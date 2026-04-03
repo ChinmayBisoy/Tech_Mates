@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RoleRoute } from './RoleRoute'
@@ -484,6 +484,14 @@ const router = createBrowserRouter([
             <Suspense fallback={<PageLoader />}>
               <SubscriptionPage />
             </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'subscription/checkout/:planId',
+        element: (
+          <ProtectedRoute>
+            <Navigate to="/payments/subscription" replace />
           </ProtectedRoute>
         ),
       },

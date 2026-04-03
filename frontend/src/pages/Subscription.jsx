@@ -51,10 +51,6 @@ export default function Subscription() {
     mutationFn: (planId) => subscriptionAPI.upgradeSubscription(planId),
     onSuccess: (data) => {
       setCurrentSubscription(data)
-      showToast.success('Subscription upgraded successfully!')
-      setTimeout(() => {
-        navigate('/settings')
-      }, 1500)
     },
     onError: (error) => {
       const errorMsg =
@@ -68,6 +64,12 @@ export default function Subscription() {
   // Handle plan selection
   const handleSelectPlan = async (plan) => {
     setSelectedPlan(plan)
+    if (plan.id !== 'free') {
+      navigate('/subscription-upgrade-disabled')
+      return
+    }
+
+    // Keep free-tier activation behavior unchanged.
     upgradeMutation.mutate(plan.id)
   }
 

@@ -18,8 +18,10 @@ export const ProtectedRoute = ({ children }) => {
 
   const isSetupRoute = location.pathname === '/profile/setup'
   const isAdmin = user?.role === 'admin'
+  const isClientRole = user?.role === 'client' || user?.role === 'user'
 
-  if (!isAdmin && !isProfileComplete && !isSetupRoute) {
+  // Only check profile completion for developers, not for clients/admins
+  if (!isAdmin && !isClientRole && !isProfileComplete && !isSetupRoute) {
     return <Navigate to="/profile/setup" replace />
   }
 

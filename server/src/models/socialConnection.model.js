@@ -36,14 +36,13 @@ const socialConnectionSchema = new mongoose.Schema(
   }
 );
 
-socialConnectionSchema.pre('validate', function setPairKey(next) {
+socialConnectionSchema.pre('validate', function setPairKey() {
   if (!this.requesterId || !this.receiverId) {
-    return next();
+    return;
   }
 
   const [a, b] = [String(this.requesterId), String(this.receiverId)].sort();
   this.pairKey = `${a}:${b}`;
-  next();
 });
 
 module.exports = mongoose.model('SocialConnection', socialConnectionSchema);

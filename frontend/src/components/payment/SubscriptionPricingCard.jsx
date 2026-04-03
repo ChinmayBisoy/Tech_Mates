@@ -1,5 +1,4 @@
 import { Check, Lock, Zap } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 const colorMap = {
   gray: 'border-gray-200 dark:border-gray-700 bg-white dark:bg-surface',
@@ -13,16 +12,8 @@ export default function SubscriptionPricingCard({
   onSelectPlan,
   isLoading,
 }) {
-  const navigate = useNavigate()
-
   const handleSelect = () => {
-    if (plan.id === 'free') {
-      // Free tier - no need for payment
-      onSelectPlan?.(plan)
-    } else {
-      // Redirect to checkout
-      navigate(`/subscription/checkout/${plan.id}`)
-    }
+    onSelectPlan?.(plan)
   }
 
   return (

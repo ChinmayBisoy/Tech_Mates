@@ -5,6 +5,7 @@ import { Search, Users, Link2, UserPlus, Check, X, MessageSquare, Trophy, Briefc
 import { socialAPI } from '@/api/social.api';
 import { chatAPI } from '@/api/chat.api';
 import { useAuth } from '@/hooks/useAuth';
+import showToast from '@/lib/toast';
 
 export default function SocialisePage() {
   const navigate = useNavigate();
@@ -16,6 +17,16 @@ export default function SocialisePage() {
   const [bio, setBio] = useState('');
   const [achievementsInput, setAchievementsInput] = useState('');
   const [recentWorksInput, setRecentWorksInput] = useState('');
+  const [pendingConnectUserId, setPendingConnectUserId] = useState(null);
+
+  const getErrorMessage = (error, fallback) => {
+    const responseData = error?.response?.data;
+    if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+      return responseData.errors[0]?.message || fallback;
+    }
+
+    return responseData?.message || error?.message || fallback;
+  };
 
   const { data: discoverUsers = [], isLoading: discoverLoading } = useQuery({
     queryKey: ['social-discover'],
@@ -59,17 +70,43 @@ export default function SocialisePage() {
 
   const sendRequestMutation = useMutation({
     mutationFn: (targetUserId) => socialAPI.sendRequest(targetUserId),
-    onSuccess: refreshSocialQueries,
+    onMutate: (targetUserId) => {
+      setPendingConnectUserId(targetUserId);
+    },
+    onSuccess: () => {
+      refreshSocialQueries();
+      showToast.success('Connection request sent successfully.');
+    },
+    onError: (error) => {
+      showToast.error(getErrorMessage(error, 'Failed to send connection request.'));
+    },
+    onSettled: () => {
+      setPendingConnectUserId(null);
+    },
   });
 
   const respondMutation = useMutation({
     mutationFn: ({ requestId, action }) => socialAPI.respondToRequest(requestId, action),
-    onSuccess: refreshSocialQueries,
+    onSuccess: (_, variables) => {
+      refreshSocialQueries();
+      showToast.success(
+        variables?.action === 'accept' ? 'Connection request accepted.' : 'Connection request rejected.'
+      );
+    },
+    onError: (error) => {
+      showToast.error(getErrorMessage(error, 'Failed to respond to request.'));
+    },
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: socialAPI.updateMySocialProfile,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['social-profile-me'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-profile-me'] });
+      showToast.success('Social profile saved successfully.');
+    },
+    onError: (error) => {
+      showToast.error(getErrorMessage(error, 'Failed to save social profile.'));
+    },
   });
 
   const visibleUsers = useMemo(() => {
@@ -99,9 +136,11 @@ export default function SocialisePage() {
       const roomId = room?._id || room?.id;
       if (roomId) {
         navigate(`/chat/${roomId}`);
+      } else {
+        showToast.error('Could not open chat room. Please try again.');
       }
     } catch (error) {
-      console.error('Failed to create chat room', error);
+      showToast.error(getErrorMessage(error, 'Failed to start conversation.'));
     }
   };
 
@@ -189,13 +228,19 @@ export default function SocialisePage() {
                       </div>
 
                       <div className="shrink-0">
+                        {(() => {
+                          const isSendingThisUser = sendRequestMutation.isPending && pendingConnectUserId === person._id;
+
+                          return (
+                            <>
                         {person.connectionStatus === 'none' && (
                           <button
                             onClick={() => sendRequestMutation.mutate(person._id)}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold"
+                            disabled={isSendingThisUser}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold"
                           >
                             <UserPlus className="w-4 h-4" />
-                            Connect
+                            {isSendingThisUser ? 'Sending...' : 'Connect'}
                           </button>
                         )}
                         {person.connectionStatus === 'pending_sent' && (
@@ -213,6 +258,9 @@ export default function SocialisePage() {
                             Message
                           </button>
                         )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -237,17 +285,19 @@ export default function SocialisePage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => respondMutation.mutate({ requestId: request._id, action: 'accept' })}
-                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
+                        disabled={respondMutation.isPending}
+                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         <Check className="w-4 h-4" />
-                        Accept
+                        {respondMutation.isPending ? 'Working...' : 'Accept'}
                       </button>
                       <button
                         onClick={() => respondMutation.mutate({ requestId: request._id, action: 'reject' })}
-                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+                        disabled={respondMutation.isPending}
+                        className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         <X className="w-4 h-4" />
-                        Reject
+                        {respondMutation.isPending ? 'Working...' : 'Reject'}
                       </button>
                     </div>
                   </div>

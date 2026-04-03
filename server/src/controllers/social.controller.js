@@ -37,6 +37,26 @@ const toConnectionStatus = (connection, currentUserId) => {
   return 'none';
 };
 
+const buildConnectionConflictError = (connection, currentUserId) => {
+  if (!connection) {
+    return null;
+  }
+
+  if (connection.status === 'accepted') {
+    return new ApiError(409, 'You are already connected');
+  }
+
+  if (connection.status === 'pending') {
+    if (String(connection.requesterId) === String(currentUserId)) {
+      return new ApiError(409, 'Connection request already sent');
+    }
+
+    return new ApiError(409, 'This user has already sent you a request. Check incoming requests.');
+  }
+
+  return null;
+};
+
 const listDiscoverUsers = asyncHandler(async (req, res) => {
   const currentUserId = String(req.user._id);
   const targetRoles = getTargetRoles(req.user.role);
@@ -88,6 +108,7 @@ const listDiscoverUsers = asyncHandler(async (req, res) => {
 
 const sendConnectionRequest = asyncHandler(async (req, res) => {
   const { targetUserId } = req.validatedBody || req.body;
+  const currentUserId = String(req.user._id);
 
   if (!mongoose.Types.ObjectId.isValid(targetUserId)) {
     throw new ApiError(400, 'Invalid target user id');
@@ -107,29 +128,45 @@ const sendConnectionRequest = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'You can only connect with opposite-role users');
   }
 
-  const pairKey = [String(req.user._id), String(targetUserId)].sort().join(':');
+  const pairKey = [currentUserId, String(targetUserId)].sort().join(':');
   const existing = await SocialConnection.findOne({ pairKey });
 
   if (!existing) {
-    const connection = await SocialConnection.create({
-      requesterId: req.user._id,
-      receiverId: targetUserId,
-      status: 'pending',
-    });
+    try {
+      const connection = await SocialConnection.create({
+        requesterId: req.user._id,
+        receiverId: targetUserId,
+        status: 'pending',
+      });
 
-    return res.json(new ApiResponse(201, connection, 'Connection request sent successfully'));
-  }
+      return res.json(new ApiResponse(201, connection, 'Connection request sent successfully'));
+    } catch (error) {
+      // Handle race condition where two requests for the same pair are created together.
+      if (error?.code === 11000) {
+        const duplicate = await SocialConnection.findOne({ pairKey });
+        const conflictError = buildConnectionConflictError(duplicate, currentUserId);
+        if (conflictError) {
+          throw conflictError;
+        }
 
-  if (existing.status === 'accepted') {
-    throw new ApiError(409, 'You are already connected');
-  }
+        if (duplicate) {
+          duplicate.requesterId = req.user._id;
+          duplicate.receiverId = targetUserId;
+          duplicate.status = 'pending';
+          duplicate.respondedAt = null;
+          await duplicate.save();
 
-  if (existing.status === 'pending') {
-    if (String(existing.requesterId) === String(req.user._id)) {
-      throw new ApiError(409, 'Connection request already sent');
+          return res.json(new ApiResponse(200, duplicate, 'Connection request sent successfully'));
+        }
+      }
+
+      throw error;
     }
+  }
 
-    throw new ApiError(409, 'This user has already sent you a request. Check incoming requests.');
+  const existingConflict = buildConnectionConflictError(existing, currentUserId);
+  if (existingConflict) {
+    throw existingConflict;
   }
 
   existing.requesterId = req.user._id;
