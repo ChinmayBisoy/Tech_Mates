@@ -1,7 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { PageLoader } from '@/components/shared/PageLoader'
+import KYCBanner from '@/components/kyc/KYCBanner'
+import KYCModal from '@/components/kyc/KYCModal'
 import {
   ArrowRight,
   BadgeCheck,
@@ -347,6 +350,25 @@ function LandingPage() {
 function ClientDashboardHome() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [showKYCModal, setShowKYCModal] = useState(false)
+
+  // Fetch KYC status
+  const { data: kycData = {}, refetch: refetchKYC } = useQuery({
+    queryKey: ['kycStatus'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/kyc/status', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        })
+        const result = await response.json()
+        return result.data || { status: 'pending' }
+      } catch {
+        return { status: 'pending' }
+      }
+    },
+  })
 
   // Fetch my requirements
   const { data: requirementsData = {}, isLoading: reqLoading } = useQuery({
@@ -397,6 +419,23 @@ function ClientDashboardHome() {
             You have {activeProposals} new proposals and {activeContracts} active contracts
           </p>
         </div>
+
+        {/* KYC Banner */}
+        <KYCBanner
+          kycStatus={kycData?.status}
+          onStartKYC={() => setShowKYCModal(true)}
+        />
+
+        {/* KYC Modal */}
+        {showKYCModal && (
+          <KYCModal
+            onClose={() => setShowKYCModal(false)}
+            onSuccess={() => {
+              refetchKYC()
+              setShowKYCModal(false)
+            }}
+          />
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4 mb-8">
@@ -670,6 +709,25 @@ function ClientDashboardHome() {
 function DeveloperDashboardHome() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [showKYCModal, setShowKYCModal] = useState(false)
+
+  // Fetch KYC status
+  const { data: kycData = {}, refetch: refetchKYC } = useQuery({
+    queryKey: ['kycStatus-dev'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/kyc/status', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        })
+        const result = await response.json()
+        return result.data || { status: 'pending' }
+      } catch {
+        return { status: 'pending' }
+      }
+    },
+  })
 
   // Fetch dashboard stats
   const { data: dashboardData } = useQuery({
@@ -782,6 +840,23 @@ function DeveloperDashboardHome() {
             Here's your development dashboard at a glance
           </p>
         </div>
+
+        {/* KYC Banner */}
+        <KYCBanner
+          kycStatus={kycData?.status}
+          onStartKYC={() => setShowKYCModal(true)}
+        />
+
+        {/* KYC Modal */}
+        {showKYCModal && (
+          <KYCModal
+            onClose={() => setShowKYCModal(false)}
+            onSuccess={() => {
+              refetchKYC()
+              setShowKYCModal(false)
+            }}
+          />
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

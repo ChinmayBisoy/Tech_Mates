@@ -74,6 +74,9 @@ const SubscriptionPage = lazy(() => import('@/pages/Subscription'))
 const SubscriptionCheckoutPage = lazy(() => import('@/pages/SubscriptionCheckout'))
 const SubscriptionSuccessPage = lazy(() => import('@/pages/SubscriptionSuccess'))
 
+// Lazy import for Earnings
+const EarningsPage = lazy(() => import('@/pages/Earnings'))
+
 // Stub page component for routes being built in other phases
 const StubPage = ({ title }) => (
   <div className="min-h-screen flex items-center justify-center">
@@ -432,7 +435,13 @@ const router = createBrowserRouter([
       },
       {
         path: 'payments/earnings',
-        element: <StubPage title="Earnings" />,
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <EarningsPage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'payments/subscription',

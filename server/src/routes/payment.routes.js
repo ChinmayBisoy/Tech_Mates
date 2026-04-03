@@ -51,4 +51,47 @@ router.post(
   paymentController.requestPayout
 );
 
+// Withdrawal endpoints (Transaction 2: Developer → Bank)
+router.post(
+  '/withdrawal/initiate',
+  verifyJWT,
+  requireRole('developer'),
+  paymentController.initiateWithdrawal
+);
+
+router.get(
+  '/withdrawal/history',
+  verifyJWT,
+  paymentController.getWithdrawalHistory
+);
+
+// Payment verification endpoints
+router.post(
+  '/verify-milestone',
+  verifyJWT,
+  paymentController.verifyMilestonePayment
+);
+
+// Transaction history
+router.get(
+  '/transactions/history',
+  verifyJWT,
+  paymentController.getTransactionHistory
+);
+
+// Admin withdrawal management
+router.post(
+  '/admin/withdrawal/:withdrawalId/process',
+  verifyJWT,
+  requireRole('admin'),
+  paymentController.processWithdrawal
+);
+
+router.post(
+  '/admin/withdrawal/:withdrawalId/cancel',
+  verifyJWT,
+  requireRole('admin'),
+  paymentController.cancelWithdrawal
+);
+
 module.exports = router;

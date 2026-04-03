@@ -132,9 +132,49 @@ const userSchema = new mongoose.Schema({
         default: 0,
         min: 0,
     },
-    kycVerified: {
-        type: Boolean,
-        default: false,
+    kyc: {
+        status: {
+            type: String,
+            enum: ['pending', 'submitted', 'verified', 'rejected'],
+            default: 'pending',
+        },
+        personalInfo: {
+            firstName: String,
+            lastName: String,
+            dateOfBirth: Date,
+            gender: String,
+            address: String,
+            city: String,
+            state: String,
+            zipCode: String,
+            country: {
+                type: String,
+                default: 'India',
+            },
+            phone: String,
+        },
+        documents: {
+            pan: {
+                url: String,
+                uploadedAt: Date,
+            },
+            aadhar: {
+                url: String,
+                uploadedAt: Date,
+            },
+            selfie: {
+                url: String,
+                uploadedAt: Date,
+            },
+            addressProof: {
+                url: String,
+                uploadedAt: Date,
+            },
+        },
+        rejectionReason: String,
+        verifiedAt: Date,
+        rejectedAt: Date,
+        submittedAt: Date,
     },
     status: {
         type: String,

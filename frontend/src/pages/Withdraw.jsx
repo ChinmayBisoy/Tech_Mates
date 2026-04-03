@@ -21,6 +21,9 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { showToast } from '@/lib/toast'
+import KYCBanner from '@/components/kyc/KYCBanner'
+import KYCModal from '@/components/kyc/KYCModal'
+import kycApi from '@/api/kyc.api'
 
 // Validation Schema
 const withdrawalSchema = z.object({
@@ -395,6 +398,20 @@ export default function WithdrawPage() {
   const { user, isDeveloper } = useAuth()
   const navigate = useNavigate()
   const [successMessage, setSuccessMessage] = useState('')
+  const [showKYCModal, setShowKYCModal] = useState(false)
+
+  // Fetch KYC status
+  const { data: kycData = {}, refetch: refetchKYC } = useQuery({
+    queryKey: ['kyc-status-withdraw'],
+    queryFn: async () => {
+      try {
+        const response = await kycApi.getStatus()
+        return response.data || { status: 'pending' }
+      } catch {
+        return { status: 'pending' }
+      }
+    },
+  })
 
   const { data: earningsData, isLoading } = useQuery({
     queryKey: ['earnings-summary', user?._id],
@@ -447,6 +464,23 @@ export default function WithdrawPage() {
             Transfer your released earnings to your bank account or digital wallet
           </p>
         </div>
+
+        {/* KYC Banner */}
+        <KYCBanner
+          kycStatus={kycData?.status}
+          onStartKYC={() => setShowKYCModal(true)}
+        />
+
+        {/* KYC Modal */}
+        {showKYCModal && (
+          <KYCModal
+            onClose={() => setShowKYCModal(false)}
+            onSuccess={() => {
+              refetchKYC()
+              setShowKYCModal(false)
+            }}
+          />
+        )}
 
         {/* Success Message */}
         {successMessage && (

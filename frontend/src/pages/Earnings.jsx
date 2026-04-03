@@ -19,19 +19,26 @@ import {
   FileText,
   CreditCard,
   TrendingDown,
+  Wallet,
+  TrendingUp as TrendingUpIcon,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { walletAPI } from '@/api/wallet.api'
 import { earningsAPI } from '@/api/earnings.api'
 import { useNavigate } from 'react-router-dom'
+import { EarningsCommissionBreakdown } from '@/components/earnings/EarningsCommissionBreakdown'
+import { PayoutManagement } from '@/components/earnings/PayoutManagement'
+import { EarningsForecast } from '@/components/earnings/EarningsForecast'
+import { PayoutHistory } from '@/components/earnings/PayoutHistory'
 
 // Tab components
 function OverviewTab({ earningsData }) {
   const transactions = earningsData?.transactions || []
-  const totalEarnings = earningsData?.totalEarnings || 0
-  const releasedEarnings = earningsData?.releasedEarnings || 0
-  const pendingEarnings = earningsData?.pendingEarnings || 0
-  const thisMonthEarnings = earningsData?.thisMonthEarnings || 0
+  const summary = earningsData?.summary || {}
+  const totalEarnings = summary.totalEarnings || 0
+  const releasedEarnings = summary.totalEarnings || 0
+  const pendingEarnings = summary.pendingEarnings || 0
+  const thisMonthEarnings = summary.thisMonthEarnings || 0
 
   return (
     <div className="space-y-6">
@@ -509,53 +516,66 @@ function EarningCard({ label, amount, icon: Icon, color, trend }) {
 }
 
 function TransactionRow({ transaction }) {
+  const [expanded, setExpanded] = useState(false)
   const isIncoming = transaction.type === 'milestone_release' || transaction.type === 'milestone_payment'
   const amount = transaction.developerEarnings || transaction.amount || 0
 
   return (
-    <div className="flex items-center justify-between py-4 px-6 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-      <div className="flex items-center gap-4 flex-1">
-        <div
-          className={`p-2 rounded-lg ${
-            isIncoming
-              ? 'bg-green-100 dark:bg-green-900/30'
-              : 'bg-red-100 dark:bg-red-900/30'
-          }`}
-        >
-          {isIncoming ? (
-            <ArrowDownLeft className="w-4 h-4 text-green-600 dark:text-green-400" />
-          ) : (
-            <ArrowUpRight className="w-4 h-4 text-red-600 dark:text-red-400" />
-          )}
+    <>
+      <div 
+        className="flex items-center justify-between py-4 px-6 border-b border-gray-100 dark:border-gray-700 last:border-b-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center gap-4 flex-1">
+          <div
+            className={`p-2 rounded-lg ${
+              isIncoming
+                ? 'bg-green-100 dark:bg-green-900/30'
+                : 'bg-red-100 dark:bg-red-900/30'
+            }`}
+          >
+            {isIncoming ? (
+              <ArrowDownLeft className="w-4 h-4 text-green-600 dark:text-green-400" />
+            ) : (
+              <ArrowUpRight className="w-4 h-4 text-red-600 dark:text-red-400" />
+            )}
+          </div>
+
+          <div className="flex-1">
+            <p className="font-medium text-gray-900 dark:text-white capitalize">
+              {transaction.type === 'milestone_release'
+                ? 'Milestone Payment Released'
+                : 'Milestone Earned'}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {new Date(transaction.createdAt).toLocaleDateString()}
+            </p>
+          </div>
         </div>
 
-        <div className="flex-1">
-          <p className="font-medium text-gray-900 dark:text-white capitalize">
-            {transaction.type === 'milestone_release'
-              ? 'Milestone Payment Released'
-              : 'Milestone Earned'}
+        <div className="text-right">
+          <p
+            className={`font-bold text-lg ${
+              isIncoming
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}
+          >
+            {isIncoming ? '+' : '-'}₹{Math.abs(amount).toLocaleString()}
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {new Date(transaction.createdAt).toLocaleDateString()}
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
+            {transaction.status}
           </p>
         </div>
       </div>
 
-      <div className="text-right">
-        <p
-          className={`font-bold text-lg ${
-            isIncoming
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-red-600 dark:text-red-400'
-          }`}
-        >
-          {isIncoming ? '+' : '-'}₹{Math.abs(amount).toLocaleString()}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
-          {transaction.status}
-        </p>
-      </div>
-    </div>
+      {/* Expanded Commission Details */}
+      {expanded && (
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-700">
+          <EarningsCommissionBreakdown transaction={transaction} />
+        </div>
+      )}
+    </>
   )
 }
 
@@ -620,12 +640,15 @@ export default function EarningsPage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
 
-  const { data: earningsData, isLoading, isError } = useQuery({
+  const { data: earningsResponse, isLoading, isError, error } = useQuery({
     queryKey: ['earnings', user?._id],
     queryFn: () => walletAPI.getEarnings(1, 50),
     enabled: !!user && isDeveloper,
     staleTime: 5 * 60 * 1000,
   })
+
+  // Extract data from nested response structure
+  const earningsData = earningsResponse?.data || earningsResponse || {}
 
   if (!isDeveloper) {
     return (
@@ -669,7 +692,9 @@ export default function EarningsPage() {
     { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'breakdown', label: 'Breakdown', icon: PieChart },
-    { id: 'forecast', label: 'Forecast', icon: TrendingUp },
+    { id: 'forecast', label: 'Forecast', icon: TrendingUpIcon },
+    { id: 'payout', label: 'Payout', icon: Wallet },
+    { id: 'payout-history', label: 'History', icon: Clock },
     { id: 'tax', label: 'Tax & Compliance', icon: FileText },
     { id: 'export', label: 'Export', icon: Download },
   ]
@@ -717,10 +742,12 @@ export default function EarningsPage() {
 
         {/* Tab Content */}
         <div>
-          {activeTab === 'overview' && <OverviewTab earningsData={earningsData?.data} />}
+          {activeTab === 'overview' && <OverviewTab earningsData={earningsData} />}
           {activeTab === 'analytics' && <AnalyticsTab />}
           {activeTab === 'breakdown' && <BreakdownTab />}
-          {activeTab === 'forecast' && <ForecastTab />}
+          {activeTab === 'forecast' && <EarningsForecast forecastData={earningsData?.forecast} />}
+          {activeTab === 'payout' && <PayoutManagement releasedEarnings={earningsData?.summary?.totalEarnings || 0} kycVerified={user?.kycVerified} />}
+          {activeTab === 'payout-history' && <PayoutHistory />}
           {activeTab === 'tax' && <TaxTab navigate={navigate} />}
           {activeTab === 'export' && <ExportTab />}
         </div>
