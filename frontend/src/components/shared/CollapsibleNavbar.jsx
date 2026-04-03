@@ -71,7 +71,7 @@ export function CollapsibleNavbar() {
   const publicNavItems = [
     { icon: Home, label: 'Home', path: '/', public: true },
     { icon: ShoppingBag, label: 'Projects', path: '/projects', public: true },
-    { icon: Code2, label: 'SE Market', path: '/se-market/browse', public: true },
+    { icon: Code2, label: 'SE Market', path: '/se-market', public: true },
     { icon: Users, label: 'Developers', path: '/browse/developers', public: true },
   ]
 
@@ -102,9 +102,9 @@ export function CollapsibleNavbar() {
   ]
 
   const developerWorkItems = [
-    { icon: TrendingUp, label: 'Opportunities', path: '/se-market/browse' },
+    { icon: TrendingUp, label: 'Opportunities', path: '/se-market' },
     { icon: FileText, label: 'My Proposals', path: '/se-market/my-proposals' },
-    { icon: Briefcase, label: 'My Contracts', path: '/contracts' },
+    { icon: Briefcase, label: 'My Contracts', path: '/dashboard/contracts' },
   ]
 
   const developerMarketplaceItems = [
@@ -137,7 +137,7 @@ export function CollapsibleNavbar() {
     { icon: FileText, label: 'Post a Requirement', path: '/se-market/post-requirement' },
     { icon: Clock, label: 'My Requirements', path: '/se-market/my-requirements' },
     { icon: MessageSquare, label: 'Proposals Received', path: '/se-market/proposals-received' },
-    { icon: CheckCircle, label: 'My Contracts', path: '/contracts' },
+    { icon: CheckCircle, label: 'My Contracts', path: '/dashboard/contracts' },
   ]
 
   const clientMarketplaceItems = [

@@ -164,6 +164,13 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: 'se-market',
+        lazy: async () => {
+          const BrowseRequirements = await import('@/pages/se-market/BrowseRequirements')
+          return { Component: BrowseRequirements.default }
+        },
+      },
+      {
         path: 'se-market/browse',
         lazy: async () => {
           const BrowseRequirements = await import('@/pages/se-market/BrowseRequirements')
@@ -199,6 +206,16 @@ const router = createBrowserRouter([
       },
       {
         path: 'se-market/my-proposals',
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <MyProposalsPage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/proposals',
         element: (
           <ProtectedRoute>
             <Suspense fallback={<PageLoader />}>
@@ -391,6 +408,13 @@ const router = createBrowserRouter([
       },
       {
         path: 'contracts',
+        lazy: async () => {
+          const ContractList = await import('@/pages/contracts/ContractList')
+          return { Component: ContractList.default }
+        },
+      },
+      {
+        path: 'dashboard/contracts',
         lazy: async () => {
           const ContractList = await import('@/pages/contracts/ContractList')
           return { Component: ContractList.default }
