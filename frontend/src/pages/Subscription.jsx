@@ -5,6 +5,7 @@ import { AlertCircle, Check, Loader2, Lock, Zap } from 'lucide-react'
 import axios from '@/api/axios'
 import { useAuth } from '@/hooks/useAuth'
 import * as subscriptionAPI from '@/api/subscription.api'
+import { razorpayAPI } from '@/api/razorpay.api'
 import SubscriptionPricingCard from '@/components/payment/SubscriptionPricingCard'
 import useSubscriptionStore from '@/store/subscriptionStore'
 import { showToast } from '@/lib/toast'
@@ -15,6 +16,23 @@ export default function Subscription() {
   const queryClient = useQueryClient()
   const { currentSubscription, setCurrentSubscription, setSelectedPlan } =
     useSubscriptionStore()
+  const [paymentError, setPaymentError] = useState(null)
+  const [isLoadingPayment, setIsLoadingPayment] = useState(false)
+
+  // Load Razorpay script on mount
+  useEffect(() => {
+    const loadRazorpayScript = () => {
+      return new Promise((resolve) => {
+        const script = document.createElement('script')
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.onload = () => resolve(true)
+        script.onerror = () => resolve(false)
+        document.body.appendChild(script)
+      })
+    }
+
+    loadRazorpayScript()
+  }, [])
 
   // Get current subscription
   const { data: mySubscription, isLoading: isLoadingCurrent, refetch } = useQuery({
@@ -64,13 +82,80 @@ export default function Subscription() {
   // Handle plan selection
   const handleSelectPlan = async (plan) => {
     setSelectedPlan(plan)
-    if (plan.id !== 'free') {
-      navigate('/subscription-upgrade-disabled')
+    
+    // Free plan - direct upgrade
+    if (plan.id === 'free') {
+      upgradeMutation.mutate(plan.id)
       return
     }
 
-    // Keep free-tier activation behavior unchanged.
-    upgradeMutation.mutate(plan.id)
+    // Paid plan - initiate Razorpay payment
+    try {
+      setPaymentError(null)
+      setIsLoadingPayment(true)
+
+      // Step 1: Create Razorpay order
+      console.log('Creating Razorpay order for plan:', plan.id)
+      const orderData = await razorpayAPI.createSubscriptionOrder(plan.id, plan.price)
+      console.log('Order created:', orderData)
+
+      const { orderId } = orderData
+
+      // Step 2: Open Razorpay checkout
+      const paymentOptions = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: plan.price, // in paise
+        currency: 'INR',
+        order_id: orderId,
+        name: 'Tech-Mates',
+        description: `Upgrade to ${plan.name} - ₹${plan.priceNumber}/month`,
+        prefill: {
+          name: user?.firstName + ' ' + user?.lastName || user?.name || '',
+          email: user?.email || '',
+        },
+        handler: async (response) => {
+          try {
+            console.log('Payment successful:', response)
+
+            // Step 3: Verify payment signature
+            const verifyResponse = await razorpayAPI.verifyRazorpayPayment(
+              orderId,
+              response.razorpay_payment_id,
+              response.razorpay_signature
+            )
+            console.log('Payment verified:', verifyResponse)
+
+            // Step 4: Refetch subscription and show success
+            queryClient.invalidateQueries({ queryKey: ['current-subscription', user?._id] })
+            setIsLoadingPayment(false)
+            
+            showToast.success(`Successfully upgraded to ${plan.name} plan!`)
+            navigate('/my-subscription')
+          } catch (error) {
+            console.error('Payment verification failed:', error)
+            setPaymentError(error?.message || 'Payment verification failed. Please contact support.')
+            setIsLoadingPayment(false)
+            showToast.error('Payment verification failed')
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            console.log('Payment cancelled by user')
+            setIsLoadingPayment(false)
+            showToast.info('Payment cancelled')
+          },
+        },
+      }
+
+      const rzp = new window.Razorpay(paymentOptions)
+      rzp.open()
+    } catch (error) {
+      console.error('Payment initiation failed:', error)
+      const errorMsg = error?.message || 'Failed to initiate payment. Please try again.'
+      setPaymentError(errorMsg)
+      setIsLoadingPayment(false)
+      showToast.error(errorMsg)
+    }
   }
 
   if (isLoadingCurrent) {
@@ -143,13 +228,27 @@ export default function Subscription() {
                 (mySubscription.planId === plan.id || mySubscription.plan === plan.id)
               }
               isLoading={
-                upgradeMutation.isPending &&
-                (upgradeMutation.variables === plan.id || upgradeMutation.variables?.id === plan.id)
+                isLoadingPayment ||
+                (upgradeMutation.isPending &&
+                  (upgradeMutation.variables === plan.id || upgradeMutation.variables?.id === plan.id))
               }
               onSelectPlan={() => handleSelectPlan(plan)}
             />
           ))}
         </div>
+
+        {/* Payment Error Alert */}
+        {paymentError && (
+          <div className="mb-8 p-6 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-4">
+            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-red-900 dark:text-red-300 mb-1">
+                Payment Failed
+              </h3>
+              <p className="text-sm text-red-700 dark:text-red-400">{paymentError}</p>
+            </div>
+          </div>
+        )}
 
         {/* FAQ Section */}
         <div className="bg-white dark:bg-surface rounded-2xl border border-gray-200 dark:border-gray-700 p-8 md:p-12 shadow-sm">

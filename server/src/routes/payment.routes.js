@@ -99,4 +99,43 @@ router.post(
   paymentController.cancelWithdrawal
 );
 
+// ============ RAZORPAY ROUTES ============
+
+// Create Razorpay order for milestone payment
+router.post(
+  '/razorpay/create-order',
+  verifyJWT,
+  requireRole('client'),
+  paymentController.createRazorpayOrder
+);
+
+// Verify Razorpay payment
+router.post(
+  '/razorpay/verify',
+  verifyJWT,
+  paymentController.verifyRazorpayPayment
+);
+
+// Create Razorpay order for subscription
+router.post(
+  '/razorpay/subscription',
+  verifyJWT,
+  paymentController.createSubscriptionOrder
+);
+
+// Create Razorpay order for payout
+router.post(
+  '/razorpay/payout',
+  verifyJWT,
+  requireRole('developer'),
+  paymentController.createPayoutOrder
+);
+
+// Razorpay webhook (public endpoint - no auth required)
+router.post(
+  '/razorpay/webhook',
+  express.json(),
+  paymentController.handleRazorpayWebhook
+);
+
 module.exports = router;
