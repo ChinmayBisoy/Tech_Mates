@@ -37,6 +37,15 @@ const createContractFromProposal = async (proposalInput) => {
     throw new ApiError(404, 'Developer not found');
   }
 
+  const existingContract = await Contract.findOne({
+    proposalId: proposal._id,
+    isDeleted: false,
+  });
+
+  if (existingContract) {
+    return existingContract;
+  }
+
   const { platformFee, developerEarnings, rate } = calculateCommission(proposal.proposedPrice, developer);
 
   const milestones = (proposal.milestones || []).map((milestone) => ({
@@ -90,8 +99,21 @@ const getContracts = async (userId, role, pagination = {}) => {
     Contract.countDocuments(query),
   ]);
 
+  const uniqueItems = [];
+  const seenProposalIds = new Set();
+
+  for (const item of items) {
+    const proposalKey = String(item.proposalId || item._id);
+    if (seenProposalIds.has(proposalKey)) {
+      continue;
+    }
+
+    seenProposalIds.add(proposalKey);
+    uniqueItems.push(item);
+  }
+
   return {
-    items,
+    items: uniqueItems,
     pagination: {
       page,
       limit,

@@ -45,11 +45,26 @@ export default function ContractList() {
       isClientView: isUser && String(client?.id || client?._id || contract?.clientId) === String(user?.id || user?._id),
     };
   });
+
+  const uniqueContracts = [];
+  const seenContracts = new Set();
+
+  for (const contract of contracts) {
+    const key = String(contract.proposalId || contract.id);
+    if (seenContracts.has(key)) {
+      continue;
+    }
+
+    seenContracts.add(key);
+    uniqueContracts.push(contract);
+  }
+
+  const visibleContracts = uniqueContracts;
   const statusCounts = {
-    active: contracts.filter((c) => c.status === 'active').length,
-    completed: contracts.filter((c) => c.status === 'completed').length,
-    disputed: contracts.filter((c) => c.status === 'disputed').length,
-    cancelled: contracts.filter((c) => c.status === 'cancelled').length,
+    active: visibleContracts.filter((c) => c.status === 'active').length,
+    completed: visibleContracts.filter((c) => c.status === 'completed').length,
+    disputed: visibleContracts.filter((c) => c.status === 'disputed').length,
+    cancelled: visibleContracts.filter((c) => c.status === 'cancelled').length,
   };
   const statusOptions = [
     { label: 'All', value: null },
@@ -81,7 +96,7 @@ export default function ContractList() {
         {/* Statistics */}
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
           {[
-            { label: 'Total', count: contracts.length, status: null },
+            { label: 'Total', count: visibleContracts.length, status: null },
             { label: 'Active', count: statusCounts.active, status: 'active' },
             { label: 'Completed', count: statusCounts.completed, status: 'completed' },
             { label: 'Disputed', count: statusCounts.disputed, status: 'disputed' },
@@ -159,7 +174,7 @@ export default function ContractList() {
             description="An error occurred while loading your contracts."
             onRetry={() => contractsQuery.refetch()}
           />
-        ) : contracts.length === 0 ? (
+        ) : visibleContracts.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white/80 p-8 dark:border-gray-700 dark:bg-gray-900/70">
             <EmptyState
               icon={Briefcase}
@@ -173,7 +188,7 @@ export default function ContractList() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {contracts.map((contract) => (
+            {visibleContracts.map((contract) => (
               <ContractCard key={contract.id} contract={contract} />
             ))}
           </div>
