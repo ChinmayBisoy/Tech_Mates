@@ -90,7 +90,7 @@ export default function ContractDetail() {
     mutationFn: () => contractAPI.completeContract(id),
     onSuccess: () => {
       toast.success('Contract completed!');
-      navigate('/contracts');
+      navigate('/dashboard/contracts');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to complete contract');
@@ -145,7 +145,7 @@ export default function ContractDetail() {
             <ArrowLeft className="h-5 w-5" />
             Back
           </button>
-          <ErrorState title="Contract not found" description="The contract you're looking for doesn't exist." onRetry={() => navigate('/contracts')} />
+          <ErrorState title="Contract not found" description="The contract you're looking for doesn't exist." onRetry={() => navigate('/dashboard/contracts')} />
         </div>
       </div>
     );

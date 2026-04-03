@@ -80,7 +80,7 @@ export default function RequirementDetail() {
           <ErrorState
             title="Requirement not found"
             description="The requirement you're looking for doesn't exist or has been deleted."
-            onRetry={() => navigate('/se-market/browse')}
+            onRetry={() => navigate('/se-market')}
           />
         </div>
       </div>

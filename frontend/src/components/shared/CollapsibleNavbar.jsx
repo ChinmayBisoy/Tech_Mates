@@ -12,6 +12,7 @@ import {
   HelpCircle, Shield, LayoutDashboard, User, LogIn, LogOut,
   Home, ShoppingBag, Code2, FileText, Menu, X, Zap,
   Gavel, DollarSign, Hammer, AlertCircle, BarChart3, Users, MessageSquare, Star, Store,
+  AtSign,
   Briefcase, TrendingUp, Wallet, Award, Clock, CheckCircle, ChevronDown, Lock, Crown
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -71,7 +72,7 @@ export function CollapsibleNavbar() {
   const publicNavItems = [
     { icon: Home, label: 'Home', path: '/', public: true },
     { icon: ShoppingBag, label: 'Projects', path: '/projects', public: true },
-    { icon: Code2, label: 'SE Market', path: '/se-market/browse', public: true },
+    { icon: Code2, label: 'SE Market', path: '/se-market', public: true },
     { icon: Users, label: 'Developers', path: '/browse/developers', public: true },
   ]
 
@@ -99,12 +100,13 @@ export function CollapsibleNavbar() {
   const developerMainItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: User, label: 'My Profile', path: profilePath },
+    { icon: AtSign, label: 'Socialise', path: '/socialise' },
   ]
 
   const developerWorkItems = [
-    { icon: TrendingUp, label: 'Opportunities', path: '/se-market/browse' },
+    { icon: TrendingUp, label: 'Opportunities', path: '/se-market' },
     { icon: FileText, label: 'My Proposals', path: '/se-market/my-proposals' },
-    { icon: Briefcase, label: 'My Contracts', path: '/contracts' },
+    { icon: Briefcase, label: 'My Contracts', path: '/dashboard/contracts' },
   ]
 
   const developerMarketplaceItems = [
@@ -131,13 +133,14 @@ export function CollapsibleNavbar() {
   const clientMainItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: User, label: 'My Profile', path: profilePath },
+    { icon: AtSign, label: 'Socialise', path: '/socialise' },
   ]
 
   const clientHireItems = [
     { icon: FileText, label: 'Post a Requirement', path: '/se-market/post-requirement' },
     { icon: Clock, label: 'My Requirements', path: '/se-market/my-requirements' },
     { icon: MessageSquare, label: 'Proposals Received', path: '/se-market/proposals-received' },
-    { icon: CheckCircle, label: 'My Contracts', path: '/contracts' },
+    { icon: CheckCircle, label: 'My Contracts', path: '/dashboard/contracts' },
   ]
 
   const clientMarketplaceItems = [

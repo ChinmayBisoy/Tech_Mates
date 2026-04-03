@@ -3,8 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { PageLoader } from '@/components/shared/PageLoader'
+<<<<<<< HEAD
 import KYCBanner from '@/components/kyc/KYCBanner'
 import KYCModal from '@/components/kyc/KYCModal'
+=======
+import { formatINR } from '@/utils/formatCurrency'
+>>>>>>> aedaf659868d2a313b74aa879ae92f8472d9263d
 import {
   ArrowRight,
   BadgeCheck,
@@ -501,7 +505,7 @@ function ClientDashboardHome() {
               onClick={() => navigate('/browse/developers')}
               className="rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-surface dark:text-gray-300 dark:hover:bg-slate-700"
             >
-              Browse Developers
+              Search Developers
             </button>
             <button
               onClick={() => navigate('/se-market/my-requirements')}
@@ -636,7 +640,7 @@ function ClientDashboardHome() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Active Contracts Status</h2>
             <Link
-              to="/contracts"
+              to="/dashboard/contracts"
               className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 dark:text-accent dark:hover:text-accent/80 font-semibold"
             >
               View all →
@@ -742,7 +746,14 @@ function DeveloperDashboardHome() {
     queryFn: () => getMyContracts(1, 4),
     staleTime: 60 * 1000,
   })
-  const contracts = contractsData.data || []
+  const contracts = Array.isArray(contractsData?.contracts)
+    ? contractsData.contracts
+    : Array.isArray(contractsData?.data)
+      ? contractsData.data
+      : Array.isArray(contractsData)
+        ? contractsData
+        : []
+  const activeContracts = contracts.filter((contract) => contract?.status === 'active')
 
   // Fetch matching opportunities (open requirements)
   const { data: opportunitiesData = { data: [] } } = useQuery({
@@ -807,19 +818,19 @@ function DeveloperDashboardHome() {
 
   const quickActions = [
     {
-      label: 'Browse Requirements',
+      label: 'Opportunities',
       icon: Target,
       onClick: () => navigate('/se-market'),
     },
     {
-      label: 'Submit Proposal',
+      label: 'My Contracts',
       icon: Briefcase,
-      onClick: () => navigate('/se-market?action=explore'),
+      onClick: () => navigate('/dashboard/contracts'),
     },
     {
       label: 'View My Proposals',
       icon: ClipboardList,
-      onClick: () => navigate('/dashboard/proposals'),
+      onClick: () => navigate('/se-market/my-proposals'),
     },
     {
       label: 'Request Payout',
@@ -918,23 +929,23 @@ function DeveloperDashboardHome() {
           </div>
 
           <div className="space-y-4">
-            {contracts.map((contract) => (
+            {activeContracts.map((contract) => (
               <div
-                key={contract._id}
+                key={contract.id || contract._id}
                 className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {contract.requirementTitle}
+                      {contract.requirementTitle || contract.title || contract.requirementId?.title || 'Active Contract'}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Client: {contract.clientName}
+                      Client: {contract.clientName || contract.client?.name || contract.clientId?.name || 'Client'}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-primary-600 dark:text-accent">
-                      ₹{(contract.totalAmount / 1000).toFixed(0)}k
+                      {formatINR(contract.totalAmount || contract.amount || 0)}
                     </p>
                     <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                       {contract.status}
@@ -947,14 +958,14 @@ function DeveloperDashboardHome() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {contract.completedMilestones}/{contract.totalMilestones} milestones
+                      {(contract.completedMilestones ?? contract.milestones?.filter((milestone) => ['approved', 'released'].includes(milestone.status)).length) || 0}/{contract.totalMilestones || contract.milestones?.length || 0} milestones
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-primary-500 to-accent rounded-full h-2 transition-all"
                       style={{
-                        width: `${Math.round((contract.completedMilestones / contract.totalMilestones) * 100)}%`,
+                        width: `${Math.round((((contract.completedMilestones ?? contract.milestones?.filter((milestone) => ['approved', 'released'].includes(milestone.status)).length) || 0) / (contract.totalMilestones || contract.milestones?.length || 1)) * 100)}%`,
                       }}
                     />
                   </div>
@@ -962,7 +973,7 @@ function DeveloperDashboardHome() {
               </div>
             ))}
 
-            {!contracts.length && (
+            {!activeContracts.length && (
               <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
                 <Briefcase className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-600 dark:text-gray-400 mb-3">No active contracts yet</p>

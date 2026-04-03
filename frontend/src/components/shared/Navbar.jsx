@@ -65,7 +65,7 @@ export function Navbar() {
           label: 'My Requirements',
           href: '/se-market/my',
         },
-        { label: 'Contracts', href: '/contracts' },
+        { label: 'Contracts', href: '/dashboard/contracts' },
         { label: 'Chat', href: '/chat' },
       ].filter(Boolean)
     : [

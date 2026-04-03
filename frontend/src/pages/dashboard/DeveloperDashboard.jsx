@@ -179,7 +179,7 @@ export default function DeveloperDashboard() {
             </button>
 
             <button 
-              onClick={() => navigate('/contracts')}
+              onClick={() => navigate('/dashboard/contracts')}
               className="bg-gradient-to-b from-white to-emerald-50/45 dark:bg-surface rounded-2xl border border-emerald-200/70 dark:border-gray-700 p-5 text-left hover:border-primary-500 hover:shadow-xl hover:shadow-emerald-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
               <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-green-100 dark:bg-green-900/30 mb-2 group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">

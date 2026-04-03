@@ -127,7 +127,7 @@ export default function ClientDashboard() {
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 mb-3 group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
                 <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <p className="font-semibold text-slate-900 dark:text-white">Browse Developers</p>
+              <p className="font-semibold text-slate-900 dark:text-white">Search Developers</p>
               <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">Discover top talent</p>
             </button>
 
@@ -143,7 +143,7 @@ export default function ClientDashboard() {
             </button>
 
             <button 
-              onClick={() => navigate('/contracts')}
+              onClick={() => navigate('/dashboard/contracts')}
               className="bg-gradient-to-b from-white to-amber-50/50 dark:bg-surface rounded-2xl border border-amber-200/70 dark:border-gray-700 p-6 text-left hover:border-primary-500 hover:shadow-xl hover:shadow-amber-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 mb-3 group-hover:bg-orange-200 dark:group-hover:bg-orange-800/50 transition-colors">
