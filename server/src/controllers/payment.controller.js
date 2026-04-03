@@ -49,8 +49,13 @@ const refundMilestone = asyncHandler(async (req, res) => {
 });
 
 const getEarnings = asyncHandler(async (req, res) => {
+  console.log('[getEarnings] ========== START ==========');
+  console.log('[getEarnings] User ID:', req.user._id);
+  console.log('[getEarnings] Query params:', req.query);
+  
   const result = await paymentService.getEarnings(req.user._id, req.query);
-
+  
+  console.log('[getEarnings] SUCCESS - Result:', JSON.stringify(result, null, 2));
   res.json(new ApiResponse(200, result, 'Earnings fetched successfully'));
 });
 

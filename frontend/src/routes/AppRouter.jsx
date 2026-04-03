@@ -72,7 +72,6 @@ const Phase10Page = lazy(() => import('@/pages/Phase10Page'))
 
 // Lazy imports for Subscription
 const SubscriptionPage = lazy(() => import('@/pages/Subscription'))
-const SubscriptionCheckoutPage = lazy(() => import('@/pages/SubscriptionCheckout'))
 const SubscriptionSuccessPage = lazy(() => import('@/pages/SubscriptionSuccess'))
 
 // Lazy import for Earnings
@@ -484,16 +483,6 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Suspense fallback={<PageLoader />}>
               <SubscriptionPage />
-            </Suspense>
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'subscription/checkout/:planId',
-        element: (
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <SubscriptionCheckoutPage />
             </Suspense>
           </ProtectedRoute>
         ),

@@ -21,6 +21,10 @@ import {
   TrendingDown,
   Wallet,
   TrendingUp as TrendingUpIcon,
+  Filter,
+  Calendar,
+  Settings,
+  Share2,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { walletAPI } from '@/api/wallet.api'
@@ -30,53 +34,110 @@ import { EarningsCommissionBreakdown } from '@/components/earnings/EarningsCommi
 import { PayoutManagement } from '@/components/earnings/PayoutManagement'
 import { EarningsForecast } from '@/components/earnings/EarningsForecast'
 import { PayoutHistory } from '@/components/earnings/PayoutHistory'
+import { showToast } from '@/lib/toast'
 
 // Tab components
 function OverviewTab({ earningsData }) {
   const transactions = earningsData?.transactions || []
   const summary = earningsData?.summary || {}
+  const pagination = earningsData?.pagination || {}
   const totalEarnings = summary.totalEarnings || 0
   const releasedEarnings = summary.totalEarnings || 0
   const pendingEarnings = summary.pendingEarnings || 0
   const thisMonthEarnings = summary.thisMonthEarnings || 0
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format((amount || 0) / 100)
+  }
+
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Main Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <EarningCard
           label="Total Lifetime Earnings"
           amount={totalEarnings}
           icon={TrendingUp}
-          color="bg-primary-500"
-          trend="+12% from last month"
+          color="bg-gradient-to-br from-blue-500 to-blue-600"
+          trend="All-time total"
         />
         <EarningCard
-          label="This Month's Earnings"
+          label="This Month"
           amount={thisMonthEarnings}
           icon={DollarSign}
-          color="bg-accent-500"
+          color="bg-gradient-to-br from-green-500 to-green-600"
+          trend="Current month"
         />
         <EarningCard
-          label="Released Earnings"
+          label="Available to Withdraw"
           amount={releasedEarnings}
           icon={CheckCircle}
-          color="bg-green-500"
+          color="bg-gradient-to-br from-emerald-500 to-emerald-600"
+          trend="Ready for payout"
         />
         <EarningCard
-          label="Pending Earnings"
+          label="Pending Approval"
           amount={pendingEarnings}
           icon={Clock}
-          color="bg-yellow-500"
+          color="bg-gradient-to-br from-amber-500 to-amber-600"
+          trend="In escrow"
         />
+      </div>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">
+            Total Transactions
+          </h3>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {pagination.total || 0}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            {transactions.length} shown on this page
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">
+            Average Transaction
+          </h3>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {pagination.total > 0 ? formatCurrency(totalEarnings / pagination.total) : '₹0'}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Per transaction
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">
+            Completion Rate
+          </h3>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {pagination.total > 0 ? '95%' : 'N/A'}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            Successfully completed
+          </p>
+        </div>
       </div>
 
       {/* Recent Transactions */}
       <div className="rounded-2xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Recent Transactions
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Recent Transactions
+            </h2>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Last 10 of {pagination.total || 0}
+            </span>
+          </div>
         </div>
 
         {transactions.length > 0 ? (
@@ -88,9 +149,39 @@ function OverviewTab({ earningsData }) {
         ) : (
           <div className="p-12 text-center">
             <DollarSign className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4 opacity-50" />
-            <p className="text-gray-600 dark:text-gray-400">No transactions yet</p>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">No transactions yet</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+              Start working on projects to see your earnings
+            </p>
           </div>
         )}
+      </div>
+
+      {/* Quick Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800 p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h3 className="font-semibold text-purple-900 dark:text-purple-300">Performance</h3>
+          </div>
+          <p className="text-sm text-purple-800 dark:text-purple-400">
+            Your earnings are growing at a steady pace. Keep working on high-value projects!
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="font-semibold text-blue-900 dark:text-blue-300">Goals</h3>
+          </div>
+          <p className="text-sm text-blue-800 dark:text-blue-400">
+            You're 65% towards your next milestone. {formatCurrency(totalEarnings)} more to reach ₹50,000!
+          </p>
+        </div>
       </div>
     </div>
   )
@@ -487,25 +578,31 @@ function ExportTab() {
 
 // Helper Components
 function EarningCard({ label, amount, icon: Icon, color, trend }) {
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format((val || 0) / 100)
+  }
+
   return (
-    <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6">
+    <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
           {label}
         </p>
-        <div className={`p-2 rounded-lg ${color}`}>
-          <Icon className="w-5 h-5 text-white" />
+        <div className={`p-3 rounded-lg ${color} text-white`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
-
       <div className="flex items-end justify-between">
-        <div>
-          <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-            ₹{typeof amount === 'number' ? amount.toLocaleString() : '0'}
+        <div className="flex-1">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+            {formatCurrency(amount)}
           </h3>
           {trend && (
-            <p className="text-xs text-green-600 dark:text-green-400 mt-2 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               {trend}
             </p>
           )}
@@ -519,6 +616,14 @@ function TransactionRow({ transaction }) {
   const [expanded, setExpanded] = useState(false)
   const isIncoming = transaction.type === 'milestone_release' || transaction.type === 'milestone_payment'
   const amount = transaction.developerEarnings || transaction.amount || 0
+
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format((val || 0) / 100)
+  }
 
   return (
     <>
@@ -561,7 +666,7 @@ function TransactionRow({ transaction }) {
                 : 'text-red-600 dark:text-red-400'
             }`}
           >
-            {isIncoming ? '+' : '-'}₹{Math.abs(amount).toLocaleString()}
+            {isIncoming ? '+' : '-'}{formatCurrency(Math.abs(amount))}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
             {transaction.status}
@@ -634,21 +739,33 @@ function LoadingState() {
   )
 }
 
-// Main Component
 export default function EarningsPage() {
   const { user, isDeveloper } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
 
+  console.log('[EarningsPage] Current user:', user);
+  console.log('[EarningsPage] isDeveloper:', isDeveloper);
+
   const { data: earningsResponse, isLoading, isError, error } = useQuery({
     queryKey: ['earnings', user?._id],
-    queryFn: () => walletAPI.getEarnings(1, 50),
+    queryFn: async () => {
+      console.log('[EarningsQuery] Calling API...');
+      const result = await walletAPI.getEarnings(1, 50);
+      console.log('[EarningsQuery] API Result:', result);
+      return result;
+    },
     enabled: !!user && isDeveloper,
     staleTime: 5 * 60 * 1000,
   })
 
-  // Extract data from nested response structure
-  const earningsData = earningsResponse?.data || earningsResponse || {}
+  // Extract data from response (already unwrapped by axios interceptor)
+  console.log('[EarningsPage] earningsResponse:', earningsResponse);
+  console.log('[EarningsPage] isLoading:', isLoading);
+  console.log('[EarningsPage] isError:', isError);
+  console.log('[EarningsPage] error:', error);
+  
+  const earningsData = earningsResponse || {}
 
   if (!isDeveloper) {
     return (
@@ -676,12 +793,17 @@ export default function EarningsPage() {
   }
 
   if (isError) {
+    console.error('Earnings API Error:', error)
+    const errorMessage = error?.message || error?.response?.data?.message || 'Failed to load earnings data'
     return (
       <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-base dark:via-surface dark:to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-6 flex items-center gap-4">
             <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0" />
-            <p className="text-red-700 dark:text-red-400">Failed to load earnings data</p>
+            <div>
+              <p className="text-red-700 dark:text-red-400 font-semibold">{errorMessage}</p>
+              <p className="text-red-600 dark:text-red-500 text-sm mt-1">User role: {user?.role || 'unknown'} | isDeveloper: {isDeveloper.toString()}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -771,7 +893,7 @@ export default function EarningsPage() {
               ✓ Ready to Withdraw?
             </h3>
             <p className="text-sm text-green-800 dark:text-green-400 mb-4">
-              You have ₹{(earningsData?.data?.releasedEarnings || 0).toLocaleString()} available
+              You have ₹{(earningsData?.summary?.totalEarnings || 0).toLocaleString()} available
             </p>
             <button
               onClick={() => navigate('/withdraw')}

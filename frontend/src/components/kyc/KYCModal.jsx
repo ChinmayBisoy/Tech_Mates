@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import toast from 'react-hot-toast';
 import {
   X,
   Upload,
@@ -22,15 +23,15 @@ import kycApi from '../../api/kyc.api';
 
 // Validation schemas for each step
 const personalInfoSchema = z.object({
-  firstName: z.string().trim().min(1, 'First name is required').min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().trim().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
-  dateOfBirth: z.string().trim().min(1, 'Date of birth is required'),
-  gender: z.string().trim().min(1, 'Please select a gender'),
-  address: z.string().trim().min(1, 'Address is required').min(5, 'Please enter a valid address'),
-  city: z.string().trim().min(1, 'City is required').min(2, 'City must be at least 2 characters'),
-  state: z.string().trim().min(1, 'State is required').min(2, 'State must be at least 2 characters'),
+  firstName: z.string().trim().min(1).min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().trim().min(1).min(2, 'Last name must be at least 2 characters'),
+  dateOfBirth: z.string().min(1, 'Date of birth is required'),
+  gender: z.string().min(1, 'Please select a gender'),
+  address: z.string().trim().min(1).min(5, 'Please enter a valid address'),
+  city: z.string().trim().min(1).min(2, 'City must be at least 2 characters'),
+  state: z.string().trim().min(1).min(2, 'State must be at least 2 characters'),
   zipCode: z.string().trim().min(1, 'ZIP code is required'),
-  phone: z.string().trim().min(1, 'Phone number is required').regex(/^\d{10}$/, 'Phone must be exactly 10 digits'),
+  phone: z.string().trim().min(1).regex(/^\d{10}$/, 'Phone must be 10 digits'),
 });
 
 const documentsSchema = z.object({
@@ -83,8 +84,6 @@ const StepIndicator = ({ currentStep, totalSteps }) => (
 );
 
 const FormInput = ({ label, icon: Icon, error, ...props }) => {
-  const hasError = error && error.length > 0;
-  
   return (
     <div className="space-y-2.5">
       <label className="block text-sm font-semibold text-gray-900">{label}</label>
@@ -96,14 +95,10 @@ const FormInput = ({ label, icon: Icon, error, ...props }) => {
           {...props}
           className={`w-full transition-all duration-300 ${
             Icon ? 'pl-12' : 'px-4'
-          } py-3.5 bg-white border-2 rounded-xl focus:outline-none font-medium ${
-            hasError
-              ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100 bg-red-50'
-              : 'border-gray-300 group-focus-within:border-blue-500 group-hover:border-gray-400 focus:ring-2 focus:ring-blue-100'
-          }`}
+          } py-3.5 bg-white border-2 rounded-xl focus:outline-none font-medium border-gray-300 group-focus-within:border-blue-500 group-hover:border-gray-400 focus:ring-2 focus:ring-blue-100`}
         />
       </div>
-      {hasError && (
+      {error && (
         <p className="text-sm text-red-600 flex items-center gap-2 font-medium">
           <AlertCircle size={16} /> {error}
         </p>
@@ -123,15 +118,14 @@ const KYCModal = ({ onClose, onSuccess }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors, isSubmitting },
+    getValues,
     watch,
-    trigger,
-    clearErrors,
     reset,
   } = useForm({
     resolver: zodResolver(personalInfoSchema),
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
     defaultValues: {
       firstName: '',
       lastName: '',
@@ -145,7 +139,7 @@ const KYCModal = ({ onClose, onSuccess }) => {
     },
   });
 
-  const formData = watch();
+  const watchedValues = watch();
 
   const handleDocumentChange = async (e, docType) => {
     const file = e.target.files?.[0];
@@ -188,66 +182,71 @@ const KYCModal = ({ onClose, onSuccess }) => {
   };
 
   const onSubmit = async (data) => {
+    console.log('=== Form Submitted ===');
+    console.log('Step:', step);
+    console.log('Form Data:', data);
+    
     if (step === 1) {
-      // Clear any previous errors
-      clearErrors();
-      
-      // Validate all fields
-      const isValid = await trigger();
-      
-      if (isValid) {
-        setError('');
+      // Step 1: Save personal info to database
+      console.log('Step 1 - Saving personal info...');
+      setLoading(true);
+      setError('');
+
+      try {
+        const response = await kycApi.savePersonalInfo(data);
+        console.log('Personal info saved:', response);
+        
+        toast.success('Personal information saved! Please upload documents.');
         setStep(2);
-      } else {
-        setError('Please fill in all required fields correctly');
+      } catch (err) {
+        console.error('Error saving personal info:', err);
+        const errorMsg = err.response?.data?.message || 'Failed to save personal information';
+        setError(errorMsg);
+        toast.error(errorMsg);
+      } finally {
+        setLoading(false);
       }
       return;
     }
 
     if (step === 2) {
+      // Step 2: Check all documents are uploaded
+      console.log('Step 2 - Checking documents...');
+      console.log('Document URLs:', documentUrls);
+      
       if (!documentUrls.pan || !documentUrls.aadhar || !documentUrls.selfie || !documentUrls.addressProof) {
         setError('All documents (PAN, Aadhar, Selfie, Address Proof) are required');
+        toast.error('Please upload all required documents');
         return;
       }
+      
+      console.log('All documents ready, moving to step 3');
+      setError('');
       setStep(3);
       return;
     }
 
     if (step === 3) {
+      // Step 3: Submit complete KYC (documents already uploaded, personal info already saved)
+      console.log('Step 3 - Submitting KYC...');
       setLoading(true);
       setError('');
 
       try {
-        const payload = {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          dateOfBirth: data.dateOfBirth,
-          gender: data.gender,
-          address: data.address,
-          city: data.city,
-          state: data.state,
-          zipCode: data.zipCode,
-          phone: data.phone,
-        };
-
-        await kycApi.submitKYC(payload);
+        const response = await kycApi.submitKYC(data);
+        console.log('KYC submitted:', response);
+        
+        toast.success('KYC submitted successfully! Admin will verify your details.');
         onSuccess?.();
         onClose();
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to submit KYC');
+        console.error('Error submitting KYC:', err);
+        const errorMsg = err.response?.data?.message || 'Failed to submit KYC';
+        setError(errorMsg);
+        toast.error(errorMsg);
       } finally {
         setLoading(false);
       }
-    }
-  };
-
-  const handleButtonClick = async () => {
-    // For step 1, we need to manually submit and validate
-    if (step === 1) {
-      await handleSubmit(onSubmit)();
-    } else {
-      // For other steps, use handleSubmit
-      await handleSubmit(onSubmit)();
     }
   };
 
@@ -377,11 +376,7 @@ const KYCModal = ({ onClose, onSuccess }) => {
                     <label className="block text-sm font-bold text-gray-900">Gender</label>
                     <select
                       {...register('gender')}
-                      className={`w-full px-4 py-3.5 border-2 rounded-xl transition-all duration-300 focus:outline-none font-medium ${
-                        errors.gender
-                          ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                          : 'border-gray-300 bg-white hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                      }`}
+                      className="w-full px-4 py-3.5 border-2 border-gray-300 bg-white rounded-xl transition-all duration-300 focus:outline-none font-medium hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     >
                       <option value="">Select Gender</option>
                       <option value="male">Male</option>
@@ -402,11 +397,7 @@ const KYCModal = ({ onClose, onSuccess }) => {
                     {...register('address')}
                     placeholder="123 Street Name, Apartment/Suite"
                     rows="3"
-                    className={`w-full px-4 py-3.5 border-2 rounded-xl transition-all duration-300 focus:outline-none resize-none font-medium ${
-                      errors.address
-                        ? 'border-red-300 bg-red-50/50 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                        : 'border-gray-300 bg-white hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100'
-                    }`}
+                    className="w-full px-4 py-3.5 border-2 border-gray-300 bg-white rounded-xl transition-all duration-300 focus:outline-none resize-none font-medium hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   />
                   {errors.address && (
                     <p className="text-sm text-red-600 flex items-center gap-2 font-medium">
@@ -680,8 +671,7 @@ const KYCModal = ({ onClose, onSuccess }) => {
           </button>
 
           <button
-            type="button"
-            onClick={handleButtonClick}
+            type="submit"
             disabled={loading}
             className="ml-auto flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white rounded-xl hover:shadow-2xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 active:scale-95 transition-all duration-300 font-bold disabled:opacity-60 disabled:cursor-not-allowed group shadow-lg hover:scale-105 hover:-translate-y-1"
           >

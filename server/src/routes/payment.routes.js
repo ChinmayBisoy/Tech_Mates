@@ -6,6 +6,11 @@ const { fundMilestoneSchema, requestPayoutSchema } = require('../validators/paym
 
 const router = express.Router();
 
+// Test endpoint
+router.get('/test', (req, res) => {
+  res.json({ message: 'Payment routes working!', timestamp: new Date() });
+});
+
 router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),

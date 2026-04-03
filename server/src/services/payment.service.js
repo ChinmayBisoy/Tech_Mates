@@ -3,79 +3,89 @@ const User = require('../models/user.model');
 const Wallet = require('../models/wallet.model');
 const Withdrawal = require('../models/withdrawal.model');
 const ApiError = require('../utils/ApiError');
+const mongoose = require('mongoose');
 
 const normalizePagination = (pagination = {}) => {
+  console.log('[normalizePagination] Input:', pagination);
   const parsedPage = Number.parseInt(pagination.page, 10);
   const parsedLimit = Number.parseInt(pagination.limit, 10);
 
   const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
   const limit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? 10 : Math.min(parsedLimit, 50);
 
-  return { page, limit, skip: (page - 1) * limit };
+  const result = { page, limit, skip: (page - 1) * limit };
+  console.log('[normalizePagination] Output:', result);
+  return result;
 };
 
 const getEarnings = async (developerId, pagination = {}) => {
-  const { page, limit, skip } = normalizePagination(pagination);
+  try {
+    console.log('[getEarnings SERVICE] START - developerId:', developerId);
+    const { page, limit, skip } = normalizePagination(pagination);
+    
+    // Convert to ObjectId for database queries
+    let developerObjectId;
+    try {
+      developerObjectId = mongoose.Types.ObjectId.isValid(developerId) 
+        ? new mongoose.Types.ObjectId(developerId) 
+        : developerId;
+      console.log('[getEarnings SERVICE] Converted developerId to:', developerObjectId);
+    } catch (e) {
+      console.log('[getEarnings SERVICE] Could not convert to ObjectId, using string');
+      developerObjectId = developerId;
+    }
 
-  const releasedFilter = {
-    developerId,
-    status: 'released',
-    isDeleted: false,
-    type: { $in: ['milestone_release', 'milestone_payment'] },
-  };
-
-  const pendingFilter = {
-    developerId,
-    status: 'held',
-    isDeleted: false,
-    type: 'milestone_payment',
-  };
-
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const [transactions, total, releasedAgg, pendingAgg, thisMonthAgg] = await Promise.all([
-    Transaction.find({ developerId, isDeleted: false })
+    // Step 1: Just try to find transactions
+    console.log('[getEarnings SERVICE] Fetching transactions...');
+    const transactions = await Transaction.find({ developerId: developerObjectId, isDeleted: false })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
-    Transaction.countDocuments({ developerId, isDeleted: false }),
-    Transaction.aggregate([
-      { $match: releasedFilter },
-      { $group: { _id: null, total: { $sum: '$developerEarnings' } } },
-    ]),
-    Transaction.aggregate([
-      { $match: pendingFilter },
-      { $group: { _id: null, total: { $sum: '$developerEarnings' } } },
-    ]),
-    Transaction.aggregate([
-      {
-        $match: {
-          ...releasedFilter,
-          createdAt: { $gte: startOfMonth },
-        },
+      .limit(limit)
+      .lean();
+    console.log('[getEarnings SERVICE] Found transactions:', transactions.length);
+
+   const total = await Transaction.countDocuments({ developerId: developerObjectId, isDeleted: false });
+    console.log('[getEarnings SERVICE] Total transaction count:', total);
+
+    // Step 2: Calculate earnings - start simple
+    const summary = {
+      totalEarnings: 0,
+      pendingEarnings: 0,
+      thisMonthEarnings: 0,
+    };
+
+    // Calculate from transactions array if we have data
+    if (transactions.length > 0) {
+      transactions.forEach(tx => {
+        if (tx.status === 'released') {
+          summary.totalEarnings += tx.developerEarnings || 0;
+        }
+        if (tx.status === 'held') {
+          summary.pendingEarnings += tx.developerEarnings || 0;
+        }
+      });
+    }
+
+    console.log('[getEarnings SERVICE] Final summary:', summary);
+
+    const result = {
+      summary,
+      transactions: transactions || [],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
       },
-      { $group: { _id: null, total: { $sum: '$developerEarnings' } } },
-    ]),
-  ]);
+    };
 
-  const summary = {
-    totalEarnings: releasedAgg[0]?.total || 0,
-    pendingEarnings: pendingAgg[0]?.total || 0,
-    thisMonthEarnings: thisMonthAgg[0]?.total || 0,
-  };
-
-  return {
-    summary,
-    transactions,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.max(1, Math.ceil(total / limit)),
-    },
-  };
+    console.log('[getEarnings SERVICE] Returning:', JSON.stringify(result, null, 2));
+    return result;
+  } catch (error) {
+    console.error('[getEarnings SERVICE] CRITICAL ERROR:', error.message);
+    console.error('[getEarnings SERVICE] Stack:', error.stack);
+    throw error;
+  }
 };
 
 const requestPayout = async (developerId, amount) => {

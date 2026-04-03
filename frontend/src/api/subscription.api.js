@@ -161,9 +161,15 @@ export const cancelSubscription = async () => {
   }
 }
 
+// Get Razorpay hosted checkout - DEPRECATED
+export const getHostedCheckout = async (planId, amount, planName, email, name) => {
+  throw new Error('Razorpay integration has been removed. Use upgradeSubscription instead.')
+}
+
 export const subscriptionAPI = {
   getSubscriptionPlans,
   upgradeSubscription,
   getSubscription,
   cancelSubscription,
+  getHostedCheckout,
 }

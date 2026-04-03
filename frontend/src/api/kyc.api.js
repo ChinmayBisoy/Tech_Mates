@@ -1,6 +1,12 @@
 import instance from './axios';
 
 const kycApi = {
+  // Save personal info (Step 1)
+  savePersonalInfo: async (data) => {
+    const response = await instance.post('/kyc/save-personal-info', data);
+    return response.data;
+  },
+
   // Submit KYC with personal info
   submitKYC: async (data) => {
     const response = await instance.post('/kyc/submit', data);

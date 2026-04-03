@@ -57,6 +57,20 @@ const transactionSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    razorpayOrderId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    razorpaySignature: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       enum: ['pending', 'held', 'released', 'refunded', 'disputed', 'failed', 'completed', 'cancelled'],
@@ -92,7 +106,7 @@ const transactionSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['stripe', 'bank_transfer', 'internal'],
+      enum: ['stripe', 'razorpay', 'bank_transfer', 'internal'],
       default: 'internal',
     },
     metadata: mongoose.Schema.Types.Mixed,

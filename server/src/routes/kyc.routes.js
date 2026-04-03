@@ -8,6 +8,7 @@ const router = express.Router();
 
 // User KYC routes
 router.post('/submit', verifyJWT, kycController.submitKYC);
+router.post('/save-personal-info', verifyJWT, kycController.savePersonalInfo);
 router.post('/resubmit', verifyJWT, kycController.resubmitKYC);
 router.get('/status', verifyJWT, kycController.getKYCStatus);
 

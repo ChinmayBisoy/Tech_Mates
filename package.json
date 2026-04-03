@@ -1,0 +1,19 @@
+{
+  "name": "tech-mates",
+  "version": "1.0.0",
+  "description": "Tech-Mates Platform - Unified Frontend and Backend",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix ./frontend run dev\" \"npm --prefix ./server run dev\"",
+    "dev:frontend": "npm --prefix ./frontend run dev",
+    "dev:backend": "npm --prefix ./server run dev",
+    "dev:frontend-only": "npm --prefix ./frontend run dev",
+    "dev:backend-only": "npm --prefix ./server run dev",
+    "install-all": "npm install && npm install --prefix ./frontend && npm install --prefix ./server",
+    "build": "npm --prefix ./frontend run build && npm --prefix ./server run build",
+    "start": "npm --prefix ./server run start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

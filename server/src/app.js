@@ -78,8 +78,11 @@ app.get('/health', (req, res) => {
 // Global API limiter for all /api routes
 app.use('/api', apiLimiter);
 
-// Stripe webhook must use raw body and run before JSON body parser.
+// Webhooks must use raw body and run before JSON body parser.
+// Stripe webhook
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), paymentController.handleWebhook);
+
+// Subscription webhook
 app.post('/api/subscriptions/webhook', express.raw({ type: 'application/json' }), subscriptionController.handleWebhook);
 
 // Body parsing middlewares

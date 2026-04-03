@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { AlertCircle, Check, Loader2, Lock, Zap } from 'lucide-react'
+import axios from '@/api/axios'
 import { useAuth } from '@/hooks/useAuth'
 import * as subscriptionAPI from '@/api/subscription.api'
 import SubscriptionPricingCard from '@/components/payment/SubscriptionPricingCard'
@@ -64,15 +65,10 @@ export default function Subscription() {
     },
   })
 
-  const handleSelectPlan = (plan) => {
+  // Handle plan selection
+  const handleSelectPlan = async (plan) => {
     setSelectedPlan(plan)
-    if (plan.id === 'free') {
-      // Free tier - process directly
-      upgradeMutation.mutate('free')
-    } else {
-      // Paid tiers - redirect to checkout
-      navigate(`/subscription/checkout/${plan.id}`)
-    }
+    upgradeMutation.mutate(plan.id)
   }
 
   if (isLoadingCurrent) {

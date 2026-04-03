@@ -1,5 +1,19 @@
 import axios from '@/api/axios'
 
+// Get developer earnings summary
+export const getEarnings = async (page = 1, limit = 20) => {
+  try {
+    const response = await axios.get('/payments/earnings', {
+      params: { page, limit },
+    })
+    console.log('[earningsAPI.getEarnings] Response:', response)
+    return response.data
+  } catch (error) {
+    console.error('[earningsAPI.getEarnings] Error:', error)
+    throw error
+  }
+}
+
 // Get detailed earnings analytics
 export const getEarningsAnalytics = async (period = 'month') => {
   try {

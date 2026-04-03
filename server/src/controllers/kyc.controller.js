@@ -88,6 +88,71 @@ const submitKYC = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Save KYC personal information (Step 1 - Draft)
+ * @route POST /api/kyc/save-personal-info
+ */
+const savePersonalInfo = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  
+  const {
+    firstName,
+    lastName,
+    dateOfBirth,
+    gender,
+    address,
+    city,
+    state,
+    zipCode,
+    country = 'India',
+    phone,
+  } = req.body;
+
+  // Validate required fields
+  if (!firstName || !lastName || !dateOfBirth || !address || !city || !state || !zipCode || !phone) {
+    throw new ApiError(400, 'All personal information fields are required');
+  }
+
+  // Get user
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  // Initialize KYC if not exists
+  if (!user.kyc) {
+    user.kyc = {
+      status: 'pending',
+      personalInfo: {},
+      documents: {},
+    };
+  }
+
+  // Update personal info (keep status as 'pending' until all documents are uploaded)
+  user.kyc.personalInfo = {
+    firstName,
+    lastName,
+    dateOfBirth: new Date(dateOfBirth),
+    gender,
+    address,
+    city,
+    state,
+    zipCode,
+    country,
+    phone,
+  };
+
+  // Save user
+  await user.save();
+
+  res.json(
+    new ApiResponse(200, { 
+      personalInfo: user.kyc.personalInfo,
+      status: 'pending' 
+    }, 'Personal information saved successfully. Please proceed to upload documents.')
+  );
+});
+
+/**
  * Upload a single KYC document
  * @route POST /api/kyc/upload-document
  */
@@ -337,6 +402,7 @@ const resubmitKYC = asyncHandler(async (req, res) => {
 
 module.exports = {
   submitKYC,
+  savePersonalInfo,
   uploadDocument,
   getKYCStatus,
   getPendingKYC,
