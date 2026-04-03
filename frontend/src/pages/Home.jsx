@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { PageLoader } from '@/components/shared/PageLoader'
+import { formatINR } from '@/utils/formatCurrency'
 import {
   ArrowRight,
   BadgeCheck,
@@ -866,7 +867,7 @@ function DeveloperDashboardHome() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-primary-600 dark:text-accent">
-                      ₹{((contract.totalAmount || contract.amount || 0) / 1000).toFixed(0)}k
+                      {formatINR(contract.totalAmount || contract.amount || 0)}
                     </p>
                     <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                       {contract.status}

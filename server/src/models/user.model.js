@@ -69,10 +69,38 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    socialHeadline: {
+        type: String,
+        default: '',
+        maxlength: 120,
+    },
     githubUsername: {
         type: String,
         default: '',
     },
+    achievements: [{
+        type: String,
+        maxlength: 120,
+    }],
+    recentWorks: [{
+        title: {
+            type: String,
+            required: true,
+            maxlength: 120,
+            trim: true,
+        },
+        description: {
+            type: String,
+            default: '',
+            maxlength: 500,
+            trim: true,
+        },
+        link: {
+            type: String,
+            default: '',
+            trim: true,
+        },
+    }],
     portfolioLinks: [{
         type: String,
     }],
@@ -233,7 +261,10 @@ userSchema.methods.toPublicProfile = function () {
         website: this.website || '',
         linkedin: this.linkedin || '',
         instagram: this.instagram || '',
+        socialHeadline: this.socialHeadline || '',
         githubUsername: this.githubUsername || '',
+        achievements: this.achievements || [],
+        recentWorks: this.recentWorks || [],
         portfolioLinks: this.portfolioLinks || [],
         tier: this.tier || 'beginner',
         isPro: Boolean(this.isPro),

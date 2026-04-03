@@ -12,6 +12,7 @@ import {
   HelpCircle, Shield, LayoutDashboard, User, LogIn, LogOut,
   Home, ShoppingBag, Code2, FileText, Menu, X, Zap,
   Gavel, DollarSign, Hammer, AlertCircle, BarChart3, Users, MessageSquare, Star, Store,
+  AtSign,
   Briefcase, TrendingUp, Wallet, Award, Clock, CheckCircle, ChevronDown, Lock, Crown
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -99,6 +100,7 @@ export function CollapsibleNavbar() {
   const developerMainItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: User, label: 'My Profile', path: profilePath },
+    { icon: AtSign, label: 'Socialise', path: '/socialise' },
   ]
 
   const developerWorkItems = [
@@ -131,6 +133,7 @@ export function CollapsibleNavbar() {
   const clientMainItems = [
     { icon: Home, label: 'Home', path: '/' },
     { icon: User, label: 'My Profile', path: profilePath },
+    { icon: AtSign, label: 'Socialise', path: '/socialise' },
   ]
 
   const clientHireItems = [

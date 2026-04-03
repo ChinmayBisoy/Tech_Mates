@@ -36,6 +36,7 @@ const HelpPage = lazy(() => import('@/pages/Help'))
 const AdminPage = lazy(() => import('@/pages/Admin'))
 const UserProfilePage = lazy(() => import('@/pages/profile/PublicProfile'))
 const ProfileSetupPage = lazy(() => import('@/pages/profile/ProfileSetup'))
+const SocialisePage = lazy(() => import('@/pages/Socialise'))
 const SearchPage = lazy(() => import('@/pages/Search'))
 const BrowseDevelopersPage = lazy(() => import('@/pages/BrowseDevelopers'))
 
@@ -433,6 +434,16 @@ const router = createBrowserRouter([
           const { EditProfile } = await import('@/pages/profile/EditProfile')
           return { Component: EditProfile }
         },
+      },
+      {
+        path: 'socialise',
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <SocialisePage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'chat',
