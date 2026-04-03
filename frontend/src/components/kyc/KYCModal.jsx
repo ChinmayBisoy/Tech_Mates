@@ -22,15 +22,15 @@ import kycApi from '../../api/kyc.api';
 
 // Validation schemas for each step
 const personalInfoSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
-  dateOfBirth: z.string().min(1, 'Date of birth is required'),
-  gender: z.string().min(1, 'Please select a gender'),
-  address: z.string().min(1, 'Address is required').min(5, 'Please enter a valid address'),
-  city: z.string().min(1, 'City is required').min(2, 'City must be at least 2 characters'),
-  state: z.string().min(1, 'State is required').min(2, 'State must be at least 2 characters'),
-  zipCode: z.string().min(1, 'ZIP code is required'),
-  phone: z.string().min(1, 'Phone number is required').min(10, 'Phone must be 10 digits').max(10, 'Phone must be 10 digits'),
+  firstName: z.string().trim().min(1, 'First name is required').min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().trim().min(1, 'Last name is required').min(2, 'Last name must be at least 2 characters'),
+  dateOfBirth: z.string().trim().min(1, 'Date of birth is required'),
+  gender: z.string().trim().min(1, 'Please select a gender'),
+  address: z.string().trim().min(1, 'Address is required').min(5, 'Please enter a valid address'),
+  city: z.string().trim().min(1, 'City is required').min(2, 'City must be at least 2 characters'),
+  state: z.string().trim().min(1, 'State is required').min(2, 'State must be at least 2 characters'),
+  zipCode: z.string().trim().min(1, 'ZIP code is required'),
+  phone: z.string().trim().min(1, 'Phone number is required').regex(/^\d{10}$/, 'Phone must be exactly 10 digits'),
 });
 
 const documentsSchema = z.object({
@@ -130,7 +130,7 @@ const KYCModal = ({ onClose, onSuccess }) => {
     reset,
   } = useForm({
     resolver: zodResolver(personalInfoSchema),
-    mode: 'onTouched',
+    mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
       firstName: '',

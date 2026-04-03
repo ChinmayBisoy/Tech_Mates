@@ -3,12 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { PageLoader } from '@/components/shared/PageLoader'
-<<<<<<< HEAD
 import KYCBanner from '@/components/kyc/KYCBanner'
 import KYCModal from '@/components/kyc/KYCModal'
-=======
 import { formatINR } from '@/utils/formatCurrency'
->>>>>>> aedaf659868d2a313b74aa879ae92f8472d9263d
 import {
   ArrowRight,
   BadgeCheck,

@@ -20,11 +20,8 @@ const purchaseRouter = require('./routes/purchase.routes');
 const chatRouter = require('./routes/chat.routes');
 const notificationRouter = require('./routes/notification.routes');
 const subscriptionRouter = require('./routes/subscription.routes');
-<<<<<<< HEAD
 const kycRouter = require('./routes/kyc.routes');
-=======
 const socialRouter = require('./routes/social.routes');
->>>>>>> aedaf659868d2a313b74aa879ae92f8472d9263d
 const paymentController = require('./controllers/payment.controller');
 const subscriptionController = require('./controllers/subscription.controller');
 const { authLimiter, apiLimiter, paymentLimiter } = require('./middleware/rateLimiter');
@@ -107,11 +104,8 @@ app.use('/api/purchases', purchaseRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/subscriptions', subscriptionRouter);
-<<<<<<< HEAD
 app.use('/api/kyc', kycRouter);
-=======
 app.use('/api/social', socialRouter);
->>>>>>> aedaf659868d2a313b74aa879ae92f8472d9263d
 
 // Final catch-all 404
 app.use((req, res, next) => {
