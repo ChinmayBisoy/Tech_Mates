@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { useThemeStore } from '@/store/themeStore'
 import { useNotificationStore } from '@/store/notificationStore'
+import useSubscriptionStore from '@/store/subscriptionStore'
 import { Footer } from '@/components/shared/Footer'
+import * as subscriptionAPI from '@/api/subscription.api'
 import {
   Moon, Sun, Bell, Search, Settings,
   HelpCircle, Shield, LayoutDashboard, User, LogIn, LogOut,
@@ -17,6 +20,20 @@ export function CollapsibleNavbar() {
   const { isAuthenticated, user, isDeveloper, isUser, logout } = useAuth()
   const isDark = useThemeStore((state) => state.isDark)
   const toggleDarkMode = useThemeStore((state) => state.toggleDarkMode)
+  const { currentSubscription } = useSubscriptionStore()
+  
+  // Fetch current subscription
+  const { data: mySubscription } = useQuery({
+    queryKey: ['current-subscription', user?._id],
+    queryFn: subscriptionAPI.getSubscription,
+    enabled: !!user && isAuthenticated,
+    staleTime: 0, // Always fetch fresh data
+    retry: (failureCount, error) => {
+      if (error?.response?.status === 404) return false
+      return failureCount < 2
+    },
+  })
+  
   const unreadMessageNotificationCount = useNotificationStore((state) =>
     (state.notifications || []).filter((item) => !item.read && item.type === 'new_message').length
   )
@@ -59,14 +76,23 @@ export function CollapsibleNavbar() {
   ]
 
   const profilePath = '/profile/me'
+  
+  // Check if user has an active paid subscription (Pro or Max)
   const isProMember = Boolean(
+    mySubscription?.planId === 'pro' ||
+    mySubscription?.planId === 'max' ||
+    mySubscription?.plan === 'pro' ||
+    mySubscription?.plan === 'max' ||
     user?.isPro ||
     user?.pro ||
     user?.proMember ||
     user?.subscriptionStatus === 'active' ||
     user?.plan === 'pro' ||
+    user?.plan === 'max' ||
     user?.subscriptionTier === 'pro' ||
-    user?.subscription?.plan === 'pro'
+    user?.subscriptionTier === 'max' ||
+    user?.subscription?.plan === 'pro' ||
+    user?.subscription?.plan === 'max'
   )
 
   // Developer-specific grouped navigation
@@ -95,8 +121,9 @@ export function CollapsibleNavbar() {
     { icon: Wallet, label: 'Earnings', path: '/payments/earnings' },
     {
       icon: isProMember ? Award : Crown,
-      label: isProMember ? 'My Subscription' : 'Go Pro',
+      label: isProMember ? `✓ ${mySubscription?.planId === 'max' ? 'Max' : 'Pro'} Subscriber` : 'Go Pro',
       path: '/payments/subscription',
+      badge: isProMember ? 'Active' : null,
     },
   ]
 
@@ -393,6 +420,7 @@ export function CollapsibleNavbar() {
                         icon={item.icon}
                         label={item.label}
                         path={item.path}
+                        badge={item.badge}
                         isActive={isActive(item.path)}
                         isHovered={isHovered}
                         onClick={() => setIsMobileOpen(false)}

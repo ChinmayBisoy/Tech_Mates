@@ -5,8 +5,8 @@ const ApiResponse = require('../utils/ApiResponse');
 const subscriptionService = require('../services/subscription.service');
 
 const createSubscription = asyncHandler(async (req, res) => {
-  const { plan } = req.validatedBody || req.body;
-  const result = await subscriptionService.createSubscription(req.user._id, plan);
+  const { planId } = req.validatedBody || req.body;
+  const result = await subscriptionService.createSubscription(req.user._id, planId);
 
   res.json(new ApiResponse(200, result, 'Subscription created successfully'));
 });

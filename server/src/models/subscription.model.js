@@ -19,8 +19,9 @@ const subscriptionSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ['monthly', 'yearly'],
+      enum: ['free', 'pro', 'max'],
       required: true,
+      index: true,
     },
     status: {
       type: String,

@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const createSubscriptionSchema = z.object({
-  plan: z.enum(['monthly', 'yearly']),
+  planId: z.enum(['free', 'pro', 'max']),
 });
 
 module.exports = {
