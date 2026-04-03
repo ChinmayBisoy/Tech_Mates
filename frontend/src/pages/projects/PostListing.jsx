@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { SKILLS, LISTING_TYPES } from '@/utils/constants';
 import { Loader, Upload, X } from 'lucide-react';
 import { useState } from 'react';
+import AIProjectRefiner from '@/components/ai/AIProjectRefiner';
+import AIDescriptionGenerator from '@/components/ai/AIDescriptionGenerator';
 
 const postListingSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters').max(150, 'Title cannot exceed 150 characters'),
@@ -35,6 +37,7 @@ export default function PostListing() {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
+    setValue,
   } = useForm({
     resolver: zodResolver(postListingSchema),
     defaultValues: {
@@ -126,6 +129,49 @@ export default function PostListing() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleDescriptionRefine = (refinedDescription) => {
+    setValue('description', refinedDescription);
+    toast.success('Description updated with AI suggestions!');
+  };
+
+  const handleGeneratedContent = (generatedData) => {
+    // Set description
+    if (generatedData.description) {
+      setValue('description', generatedData.description);
+    }
+
+    // Set tech stack if available
+    if (generatedData.skills && Array.isArray(generatedData.skills)) {
+      const techsToAdd = generatedData.skills.filter(skill => 
+        SKILLS.some(s => s.toLowerCase() === skill.toLowerCase())
+      );
+      if (techsToAdd.length > 0) {
+        setSelectedTechs(techsToAdd);
+        setValue('techStack', techsToAdd, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+
+    // Set price/budget if available (parse from string like "₹30,000-50,000")
+    if (generatedData.estimatedBudget) {
+      const budgetString = generatedData.estimatedBudget;
+      // Extract numbers from budget string (e.g., "₹30,000-50,000" -> ["30000", "50000"])
+      const numbers = budgetString.match(/\d+(\,\d+)*/g);
+      if (numbers && numbers.length >= 1) {
+        // Use the first number for price (in rupees, not paise)
+        const price = parseInt(numbers[0].replace(/,/g, ''));
+        setValue('price', price);
+        
+        // Use the second number for original price if available
+        if (numbers.length >= 2) {
+          const originalPrice = parseInt(numbers[1].replace(/,/g, ''));
+          setValue('originalPrice', originalPrice);
+        }
+      }
+    }
+
+    toast.success('All details auto-filled! Review and submit.');
+  };
+
   // Check user role
   if (!isDeveloper) {
     return (
@@ -174,6 +220,12 @@ export default function PostListing() {
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Maximum 150 characters</p>
           </div>
 
+          {/* AI Description Generator from Title */}
+          <AIDescriptionGenerator 
+            projectTitle={watch('title')}
+            onDescriptionGenerated={handleGeneratedContent}
+          />
+
           {/* Type */}
           <div>
             <label htmlFor="type" className="block text-sm font-semibold text-gray-900 dark:text-white">
@@ -193,6 +245,12 @@ export default function PostListing() {
             </select>
             {errors.type && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.type.message}</p>}
           </div>
+
+          {/* AI Project Refiner */}
+          <AIProjectRefiner 
+            onDescriptionChange={handleDescriptionRefine}
+            initialDescription={watch('description')}
+          />
 
           {/* Description */}
           <div>

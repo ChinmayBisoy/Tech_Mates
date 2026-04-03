@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { SKILLS, CATEGORIES } from '@/utils/constants';
 import { Loader, X } from 'lucide-react';
 import { useState } from 'react';
+import AIProjectRefiner from '@/components/ai/AIProjectRefiner';
+import AIDescriptionGenerator from '@/components/ai/AIDescriptionGenerator';
 
 const postRequirementSchema = z.object({
   title: z.string().min(10, 'Title must be at least 10 characters').max(100, 'Title cannot exceed 100 characters'),
@@ -35,6 +37,7 @@ export default function PostRequirement() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(postRequirementSchema),
@@ -103,6 +106,44 @@ export default function PostRequirement() {
     toast.error('Maximum 10 skills allowed');
   };
 
+  const handleDescriptionRefine = (refinedDescription) => {
+    setValue('description', refinedDescription);
+    toast.success('Description updated with AI suggestions!');
+  };
+
+  const handleGeneratedContent = (generatedData) => {
+    // Set description
+    if (generatedData.description) {
+      setValue('description', generatedData.description);
+    }
+
+    // Set skills if available
+    if (generatedData.skills && Array.isArray(generatedData.skills)) {
+      const skillsToAdd = generatedData.skills.filter(skill => 
+        SKILLS.some(s => s.toLowerCase() === skill.toLowerCase())
+      );
+      if (skillsToAdd.length > 0) {
+        setSelectedSkills(skillsToAdd);
+        setValue('skills', skillsToAdd, { shouldValidate: true, shouldDirty: true });
+      }
+    }
+
+    // Set budget if available (parse from string like "₹30,000-50,000")
+    if (generatedData.estimatedBudget) {
+      const budgetString = generatedData.estimatedBudget;
+      // Extract numbers from budget string (e.g., "₹30,000-50,000" -> ["30000", "50000"])
+      const numbers = budgetString.match(/\d+(\,\d+)*/g);
+      if (numbers && numbers.length >= 2) {
+        // Parse as regular numbers (in rupees, not paise)
+        const minBudget = parseInt(numbers[0].replace(/,/g, ''));
+        const maxBudget = parseInt(numbers[1].replace(/,/g, ''));
+        setValue('budget', { min: minBudget, max: maxBudget });
+      }
+    }
+
+    toast.success('All details auto-filled! Review and submit.');
+  };
+
   // Check user role
   if (!isUser) {
     return (
@@ -155,6 +196,18 @@ export default function PostRequirement() {
             {errors.title && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>}
             <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">Maximum 100 characters</p>
           </div>
+
+          {/* AI Description Generator from Title */}
+          <AIDescriptionGenerator 
+            projectTitle={watch('title')}
+            onDescriptionGenerated={handleGeneratedContent}
+          />
+
+          {/* AI Project Refiner */}
+          <AIProjectRefiner 
+            onDescriptionChange={handleDescriptionRefine}
+            initialDescription={watch('description')}
+          />
 
           {/* Description */}
           <div>

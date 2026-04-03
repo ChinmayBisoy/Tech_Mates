@@ -58,23 +58,23 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-slate-800/80 backdrop-blur-lg border-b border-slate-700/50 shadow-lg">
+      <header className="sticky top-0 z-50 bg-white dark:bg-slate-800/80 backdrop-blur-lg border-b border-gray-200 dark:border-slate-700/50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-xs text-slate-400">Owner: {ownerEmail}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+              <p className="text-xs text-gray-600 dark:text-slate-400">Owner: {ownerEmail}</p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 px-4 py-2 rounded-lg border border-red-600/30 transition"
+            className="flex items-center gap-2 bg-red-600/20 hover:bg-red-600/30 text-red-600 dark:text-red-300 px-4 py-2 rounded-lg border border-red-600/30 transition"
           >
             <LogOut className="w-5 h-5" />
             Logout
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-slate-800/50 backdrop-blur-lg rounded-lg border border-slate-700/50 mb-6">
+        <div className="bg-gray-50 dark:bg-slate-800/50 backdrop-blur-lg rounded-lg border border-gray-200 dark:border-slate-700/50 mb-6 transition-colors">
           <div className="flex flex-wrap gap-1 p-2">
             {[
               { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition font-medium ${
                   activeTab === tab.id
                     ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700/30 text-slate-300 hover:bg-slate-700/50'
+                    : 'bg-gray-100 dark:bg-slate-700/30 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700/50'
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
@@ -191,19 +191,19 @@ export default function AdminDashboard() {
 
 function StatCard({ label, value, icon: Icon, color }) {
   const colorClasses = {
-    blue: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-    green: 'bg-green-500/10 border-green-500/30 text-green-400',
-    purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-    yellow: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
-    red: 'bg-red-500/10 border-red-500/30 text-red-400',
+    blue: 'light:bg-blue-50 light:border-blue-200 light:text-blue-600 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400 bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-500/10 dark:border-blue-500/30 dark:text-blue-400',
+    green: 'bg-green-50 border-green-200 text-green-600 dark:bg-green-500/10 dark:border-green-500/30 dark:text-green-400',
+    purple: 'bg-purple-50 border-purple-200 text-purple-600 dark:bg-purple-500/10 dark:border-purple-500/30 dark:text-purple-400',
+    yellow: 'bg-yellow-50 border-yellow-200 text-yellow-600 dark:bg-yellow-500/10 dark:border-yellow-500/30 dark:text-yellow-400',
+    red: 'bg-red-50 border-red-200 text-red-600 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-400',
   };
 
   return (
-    <div className={`${colorClasses[color]} border rounded-lg p-4`}>
+    <div className={`${colorClasses[color]} border rounded-lg p-4 transition-colors`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400 mb-1">{label}</p>
-          <p className="text-2xl font-bold text-white">{value}</p>
+          <p className="text-sm text-gray-600 dark:text-slate-400 mb-1">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
         </div>
         <Icon className="w-10 h-10 opacity-40" />
       </div>
@@ -213,21 +213,21 @@ function StatCard({ label, value, icon: Icon, color }) {
 
 function RevenueCard({ data }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-      <h3 className="text-lg font-bold text-white mb-4">Revenue Summary</h3>
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Revenue Summary</h3>
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Total Revenue</span>
-          <span className="text-2xl font-bold text-green-400">${data.totalRevenue}</span>
+          <span className="text-gray-600 dark:text-slate-400">Total Revenue</span>
+          <span className="text-2xl font-bold text-green-600 dark:text-green-400">${data.totalRevenue}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400">Platform Commission (10%)</span>
-          <span className="text-xl font-semibold text-blue-400">${data.platformCommission}</span>
+          <span className="text-gray-600 dark:text-slate-400">Platform Commission (10%)</span>
+          <span className="text-xl font-semibold text-blue-600 dark:text-blue-400">${data.platformCommission}</span>
         </div>
-        <div className="border-t border-slate-700 pt-3">
+        <div className="border-t border-gray-200 dark:border-slate-700 pt-3">
           <div className="flex justify-between items-center">
-            <span className="text-slate-400">Average Transaction</span>
-            <span className="text-lg font-semibold text-slate-300">
+            <span className="text-gray-600 dark:text-slate-400">Average Transaction</span>
+            <span className="text-lg font-semibold text-gray-700 dark:text-slate-300">
               ${Math.round(data.totalRevenue / data.totalTransactions)}
             </span>
           </div>
@@ -245,26 +245,26 @@ function DisputeStats({ disputes }) {
   };
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-      <h3 className="text-lg font-bold text-white mb-4">Dispute Statistics</h3>
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Dispute Statistics</h3>
       <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <span className="text-slate-400 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-yellow-400" /> Open
+          <span className="text-gray-600 dark:text-slate-400 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" /> Open
           </span>
-          <span className="text-xl font-bold text-yellow-400">{stats.open}</span>
+          <span className="text-xl font-bold text-yellow-600 dark:text-yellow-400">{stats.open}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-400" /> Resolved
+          <span className="text-gray-600 dark:text-slate-400 flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" /> Resolved
           </span>
-          <span className="text-xl font-bold text-green-400">{stats.resolved}</span>
+          <span className="text-xl font-bold text-green-600 dark:text-green-400">{stats.resolved}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-slate-400 flex items-center gap-2">
-            <XCircle className="w-4 h-4 text-red-400" /> Rejected
+          <span className="text-gray-600 dark:text-slate-400 flex items-center gap-2">
+            <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" /> Rejected
           </span>
-          <span className="text-xl font-bold text-red-400">{stats.rejected}</span>
+          <span className="text-xl font-bold text-red-600 dark:text-red-400">{stats.rejected}</span>
         </div>
       </div>
     </div>
@@ -273,24 +273,24 @@ function DisputeStats({ disputes }) {
 
 function QuickActionsCard({ setActiveTab }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-      <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
       <div className="space-y-2">
         <button
           onClick={() => setActiveTab('disputes')}
-          className="w-full text-left px-3 py-2 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-300 transition"
+          className="w-full text-left px-3 py-2 rounded-lg bg-yellow-100 dark:bg-yellow-500/10 hover:bg-yellow-200 dark:hover:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 transition"
         >
           → Resolve Open Disputes
         </button>
         <button
           onClick={() => setActiveTab('moderation')}
-          className="w-full text-left px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 transition"
+          className="w-full text-left px-3 py-2 rounded-lg bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-700 dark:text-red-300 transition"
         >
           → Review Reported Content
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className="w-full text-left px-3 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 transition"
+          className="w-full text-left px-3 py-2 rounded-lg bg-blue-100 dark:bg-blue-500/10 hover:bg-blue-200 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-300 transition"
         >
           → Manage Users
         </button>
@@ -301,24 +301,24 @@ function QuickActionsCard({ setActiveTab }) {
 
 function PlatformHealthCard({ platformAnalytics }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-      <h3 className="text-lg font-bold text-white mb-4">Platform Health</h3>
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Platform Health</h3>
       <div className="space-y-4">
         <div>
           <div className="flex justify-between mb-2">
-            <span className="text-slate-400">User Activity</span>
-            <span className="text-green-400 font-semibold">Good</span>
+            <span className="text-gray-600 dark:text-slate-400">User Activity</span>
+            <span className="text-green-600 dark:text-green-400 font-semibold">Good</span>
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
             <div className="bg-green-500 h-2 rounded-full" style={{ width: '85%' }}></div>
           </div>
         </div>
         <div>
           <div className="flex justify-between mb-2">
-            <span className="text-slate-400">Dispute Rate</span>
-            <span className="text-yellow-400 font-semibold">Moderate</span>
+            <span className="text-gray-600 dark:text-slate-400">Dispute Rate</span>
+            <span className="text-yellow-600 dark:text-yellow-400 font-semibold">Moderate</span>
           </div>
-          <div className="w-full bg-slate-700 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
             <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '45%' }}></div>
           </div>
         </div>
@@ -329,38 +329,38 @@ function PlatformHealthCard({ platformAnalytics }) {
 
 function UsersTable({ users, onSuspend, onActivate, onBan, onVerify }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden transition-colors">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-700/30 border-b border-slate-700">
-              <th className="px-4 py-3 text-left text-white font-semibold">User</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Role</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Verified</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Actions</th>
+            <tr className="bg-gray-100 dark:bg-slate-700/30 border-b border-gray-200 dark:border-slate-700">
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">User</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Role</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Status</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Verified</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition">
+              <tr key={user.id} className="border-b border-gray-200 dark:border-slate-700/30 hover:bg-gray-100 dark:hover:bg-slate-700/20 transition">
                 <td className="px-4 py-3">
                   <div>
-                    <p className="text-white font-medium">{user.name}</p>
-                    <p className="text-xs text-slate-400">{user.email}</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{user.name}</p>
+                    <p className="text-xs text-gray-600 dark:text-slate-400">{user.email}</p>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-slate-300 capitalize">{user.role}</span>
+                  <span className="text-gray-700 dark:text-slate-300 capitalize">{user.role}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       user.status === 'active'
-                        ? 'bg-green-500/20 text-green-300'
+                        ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300'
                         : user.status === 'suspended'
-                        ? 'bg-yellow-500/20 text-yellow-300'
-                        : 'bg-red-500/20 text-red-300'
+                        ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300'
+                        : 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300'
                     }`}
                   >
                     {user.status}
@@ -368,23 +368,23 @@ function UsersTable({ users, onSuspend, onActivate, onBan, onVerify }) {
                 </td>
                 <td className="px-4 py-3">
                   {user.verified ? (
-                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-red-400" />
+                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                   )}
                 </td>
                 <td className="px-4 py-3 space-x-2">
                   {user.status === 'active' ? (
                     <button
                       onClick={() => onSuspend(user.id)}
-                      className="text-yellow-400 hover:text-yellow-300 transition text-sm"
+                      className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 transition text-sm"
                     >
                       <Pause className="w-4 h-4 inline" /> Suspend
                     </button>
                   ) : (
                     <button
                       onClick={() => onActivate(user.id)}
-                      className="text-green-400 hover:text-green-300 transition text-sm"
+                      className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition text-sm"
                     >
                       <CheckCircle className="w-4 h-4 inline" /> Activate
                     </button>
@@ -392,7 +392,7 @@ function UsersTable({ users, onSuspend, onActivate, onBan, onVerify }) {
                   {!user.verified && (
                     <button
                       onClick={() => onVerify(user.id)}
-                      className="text-blue-400 hover:text-blue-300 transition text-sm"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition text-sm"
                     >
                       <Shield className="w-4 h-4 inline" /> Verify
                     </button>
@@ -412,45 +412,45 @@ function DisputesTable({ disputes, onResolve }) {
   const [activeDisputeId, setActiveDisputeId] = useState(null);
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden transition-colors">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-700/30 border-b border-slate-700">
-              <th className="px-4 py-3 text-left text-white font-semibold">Issue</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Amount</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Date</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Action</th>
+            <tr className="bg-gray-100 dark:bg-slate-700/30 border-b border-gray-200 dark:border-slate-700">
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Issue</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Amount</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Status</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Date</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Action</th>
             </tr>
           </thead>
           <tbody>
             {disputes.map((dispute) => (
-              <tr key={dispute.id} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition">
+              <tr key={dispute.id} className="border-b border-gray-200 dark:border-slate-700/30 hover:bg-gray-100 dark:hover:bg-slate-700/20 transition">
                 <td className="px-4 py-3">
                   <div>
-                    <p className="text-white font-medium">{dispute.title}</p>
-                    <p className="text-xs text-slate-400">Buyer: {dispute.buyerId} → Seller: {dispute.sellerId}</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{dispute.title}</p>
+                    <p className="text-xs text-gray-600 dark:text-slate-400">Buyer: {dispute.buyerId} → Seller: {dispute.sellerId}</p>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-white font-semibold">${dispute.amount}</td>
+                <td className="px-4 py-3 text-gray-900 dark:text-white font-semibold">${dispute.amount}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       dispute.status === 'open'
-                        ? 'bg-yellow-500/20 text-yellow-300'
-                        : 'bg-green-500/20 text-green-300'
+                        ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300'
+                        : 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300'
                     }`}
                   >
                     {dispute.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-300 text-sm">{dispute.dateCreated}</td>
+                <td className="px-4 py-3 text-gray-700 dark:text-slate-300 text-sm">{dispute.dateCreated}</td>
                 <td className="px-4 py-3">
                   {dispute.status === 'open' && (
                     <button
                       onClick={() => setActiveDisputeId(activeDisputeId === dispute.id ? null : dispute.id)}
-                      className="text-blue-400 hover:text-blue-300 transition text-sm"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition text-sm"
                     >
                       Resolve →
                     </button>
@@ -467,51 +467,51 @@ function DisputesTable({ disputes, onResolve }) {
 
 function ModerationTable({ reports, onRemove, onApprove }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden transition-colors">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-700/30 border-b border-slate-700">
-              <th className="px-4 py-3 text-left text-white font-semibold">Type</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Reason</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Reported By</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Actions</th>
+            <tr className="bg-gray-100 dark:bg-slate-700/30 border-b border-gray-200 dark:border-slate-700">
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Type</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Reason</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Status</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Reported By</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
             {reports.map((report) => (
-              <tr key={report.id} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition">
+              <tr key={report.id} className="border-b border-gray-200 dark:border-slate-700/30 hover:bg-gray-100 dark:hover:bg-slate-700/20 transition">
                 <td className="px-4 py-3">
-                  <span className="capitalize px-2 py-1 rounded-lg bg-slate-700/50 text-slate-300 text-xs">
+                  <span className="capitalize px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-700/50 text-gray-700 dark:text-slate-300 text-xs">
                     {report.type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-white">{report.reason}</td>
+                <td className="px-4 py-3 text-gray-900 dark:text-white">{report.reason}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold ${
                       report.status === 'pending'
-                        ? 'bg-yellow-500/20 text-yellow-300'
+                        ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-300'
                         : report.status === 'under-review'
-                        ? 'bg-blue-500/20 text-blue-300'
-                        : 'bg-green-500/20 text-green-300'
+                        ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300'
+                        : 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300'
                     }`}
                   >
                     {report.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-300 text-sm">{report.reportedBy}</td>
+                <td className="px-4 py-3 text-gray-700 dark:text-slate-300 text-sm">{report.reportedBy}</td>
                 <td className="px-4 py-3 space-x-2">
                   <button
                     onClick={() => onApprove(report.id)}
-                    className="text-green-400 hover:text-green-300 transition text-sm"
+                    className="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition text-sm"
                   >
                     Approve
                   </button>
                   <button
                     onClick={() => onRemove(report.id)}
-                    className="text-red-400 hover:text-red-300 transition text-sm"
+                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition text-sm"
                   >
                     Remove
                   </button>
@@ -527,44 +527,44 @@ function ModerationTable({ reports, onRemove, onApprove }) {
 
 function TransactionsTable({ transactions }) {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg overflow-hidden">
+    <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg overflow-hidden transition-colors">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-slate-700/30 border-b border-slate-700">
-              <th className="px-4 py-3 text-left text-white font-semibold">Type</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Amount</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Parties</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Status</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Escrow</th>
-              <th className="px-4 py-3 text-left text-white font-semibold">Date</th>
+            <tr className="bg-gray-100 dark:bg-slate-700/30 border-b border-gray-200 dark:border-slate-700">
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Type</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Amount</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Parties</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Status</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Escrow</th>
+              <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Date</th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition">
+              <tr key={tx.id} className="border-b border-gray-200 dark:border-slate-700/30 hover:bg-gray-100 dark:hover:bg-slate-700/20 transition">
                 <td className="px-4 py-3">
-                  <span className="capitalize px-2 py-1 rounded-lg bg-slate-700/50 text-slate-300 text-xs">
+                  <span className="capitalize px-2 py-1 rounded-lg bg-gray-100 dark:bg-slate-700/50 text-gray-700 dark:text-slate-300 text-xs">
                     {tx.type}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-white font-semibold">${tx.amount}</td>
-                <td className="px-4 py-3 text-slate-300 text-sm">{tx.buyer || tx.seller || 'N/A'}</td>
+                <td className="px-4 py-3 text-gray-900 dark:text-white font-semibold">${tx.amount}</td>
+                <td className="px-4 py-3 text-gray-700 dark:text-slate-300 text-sm">{tx.buyer || tx.seller || 'N/A'}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`text-xs font-semibold ${
                       tx.status === 'completed'
-                        ? 'text-green-400'
+                        ? 'text-green-600 dark:text-green-400'
                         : tx.status === 'pending'
-                        ? 'text-yellow-400'
-                        : 'text-red-400'
+                        ? 'text-yellow-600 dark:text-yellow-400'
+                        : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     {tx.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-300 text-sm capitalize">{tx.escrowStatus}</td>
-                <td className="px-4 py-3 text-slate-400 text-sm">{tx.date}</td>
+                <td className="px-4 py-3 text-gray-700 dark:text-slate-300 text-sm capitalize">{tx.escrowStatus}</td>
+                <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-sm">{tx.date}</td>
               </tr>
             ))}
           </tbody>
@@ -581,11 +581,11 @@ function SettingsPanel({ settings, onUpdateCommission }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Commission Settings</h3>
+      <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Commission Settings</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">Commission Rate (%)</label>
+            <label className="block text-gray-700 dark:text-slate-300 text-sm font-medium mb-2">Commission Rate (%)</label>
             <input
               type="number"
               value={commissionRate}
@@ -593,53 +593,53 @@ function SettingsPanel({ settings, onUpdateCommission }) {
                 setCommissionRate(e.target.value);
                 onUpdateCommission(parseFloat(e.target.value));
               }}
-              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
             />
-            <p className="text-xs text-slate-400 mt-2">Current: {commissionRate}%</p>
+            <p className="text-xs text-gray-600 dark:text-slate-400 mt-2">Current: {commissionRate}%</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Price Range</h3>
+      <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Price Range</h3>
         <div className="space-y-4">
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">Minimum Price ($)</label>
+            <label className="block text-gray-700 dark:text-slate-300 text-sm font-medium mb-2">Minimum Price ($)</label>
             <input
               type="number"
               value={minPrice}
-              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
             />
           </div>
           <div>
-            <label className="block text-slate-300 text-sm font-medium mb-2">Maximum Price ($)</label>
+            <label className="block text-gray-700 dark:text-slate-300 text-sm font-medium mb-2">Maximum Price ($)</label>
             <input
               type="number"
               value={maxPrice}
-              className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
             />
           </div>
         </div>
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Dispute Resolution</h3>
+      <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Dispute Resolution</h3>
         <div>
-          <label className="block text-slate-300 text-sm font-medium mb-2">Resolution Time (days)</label>
+          <label className="block text-gray-700 dark:text-slate-300 text-sm font-medium mb-2">Resolution Time (days)</label>
           <input
             type="number"
             value={settings.disputeResolutionDays}
-            className="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+            className="w-full bg-white dark:bg-slate-700/50 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
           />
         </div>
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Platform Status</h3>
+      <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-lg p-6 transition-colors">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Platform Status</h3>
         <div className="flex items-center justify-between">
-          <span className="text-slate-300">Maintenance Mode</span>
-          <div className="w-12 h-6 bg-slate-700 rounded-full cursor-pointer">
-            <div className="w-5 h-5 bg-slate-400 rounded-full m-0.5"></div>
+          <span className="text-gray-700 dark:text-slate-300">Maintenance Mode</span>
+          <div className="w-12 h-6 bg-gray-300 dark:bg-slate-700 rounded-full cursor-pointer">
+            <div className="w-5 h-5 bg-gray-400 dark:bg-slate-400 rounded-full m-0.5"></div>
           </div>
         </div>
       </div>

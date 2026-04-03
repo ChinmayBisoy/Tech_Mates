@@ -1,10 +1,16 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const useOwnerStore = create((set, get) => ({
-  // Owner Authentication
-  isOwnerLoggedIn: false,
-  ownerEmail: null,
-  ownerRole: 'owner',
+const useOwnerStore = create(
+  persist(
+    (set, get) => ({
+      // Owner Authentication
+      isOwnerLoggedIn: false,
+      ownerEmail: null,
+      ownerRole: 'owner',
+      _hasHydrated: false,
+
+      setHydrated: () => set({ _hasHydrated: true }),
 
   // User Management
   allUsers: [
@@ -209,6 +215,19 @@ const useOwnerStore = create((set, get) => ({
     const state = get();
     return state.reportedContent.find(c => c.id === reportId);
   },
-}));
+    }),
+    {
+      name: 'owner-store',
+      partialize: (state) => ({
+        isOwnerLoggedIn: state.isOwnerLoggedIn,
+        ownerEmail: state.ownerEmail,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Mark as hydrated after localStorage is loaded
+        state?.setHydrated()
+      },
+    }
+  )
+);
 
 export default useOwnerStore;

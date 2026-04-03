@@ -60,6 +60,9 @@ const NotificationCenter_Phase9 = lazy(() => import('@/pages/phase9/Notification
 // Lazy imports for Phase 10.1 - Owner Admin Dashboard
 const OwnerLogin = lazy(() => import('@/pages/OwnerLogin'))
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'))
+const OwnerDashboard = lazy(() => import('@/pages/OwnerDashboard'))
+const OwnerAnalytics = lazy(() => import('@/pages/OwnerAnalytics'))
+const OwnerReports = lazy(() => import('@/pages/OwnerReports'))
 
 // Lazy imports for Phase 10.2 - Advanced Ratings & Reviews
 const ReviewsPage_Phase10 = lazy(() => import('@/pages/ReviewsPage'))
@@ -638,6 +641,36 @@ const router = createBrowserRouter([
           <Suspense fallback={<PageLoader />}>
             <OwnerLogin />
           </Suspense>
+        ),
+      },
+      {
+        path: 'owner-dashboard',
+        element: (
+          <OwnerRoute>
+            <Suspense fallback={<PageLoader />}>
+              <OwnerDashboard />
+            </Suspense>
+          </OwnerRoute>
+        ),
+      },
+      {
+        path: 'owner-analytics',
+        element: (
+          <OwnerRoute>
+            <Suspense fallback={<PageLoader />}>
+              <OwnerAnalytics />
+            </Suspense>
+          </OwnerRoute>
+        ),
+      },
+      {
+        path: 'owner-reports',
+        element: (
+          <OwnerRoute>
+            <Suspense fallback={<PageLoader />}>
+              <OwnerReports />
+            </Suspense>
+          </OwnerRoute>
         ),
       },
       {

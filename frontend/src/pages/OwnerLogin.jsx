@@ -26,7 +26,7 @@ export default function OwnerLogin() {
     setLoading(false);
 
     if (result.success) {
-      navigate('/admin-dashboard');
+      navigate('/owner-dashboard');
     } else {
       setError(result.message);
     }

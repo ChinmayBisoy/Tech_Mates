@@ -90,7 +90,7 @@ export function PayoutManagement({ releasedEarnings, kycVerified }) {
           <div>
             <p className="text-sm font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
               <Wallet className="w-4 h-4" />
-              Available for Payout
+              Available to Withdraw
             </p>
             <h3 className="text-4xl font-bold text-green-700 dark:text-green-300">
               ₹{releasedEarnings.toLocaleString()}
@@ -120,7 +120,7 @@ export function PayoutManagement({ releasedEarnings, kycVerified }) {
 
       {/* Payout Amount */}
       <div className="rounded-xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Request Payout</h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Request Withdrawal</h3>
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

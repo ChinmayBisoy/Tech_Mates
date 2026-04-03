@@ -815,49 +815,64 @@ export default function EarningsPage() {
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'breakdown', label: 'Breakdown', icon: PieChart },
     { id: 'forecast', label: 'Forecast', icon: TrendingUpIcon },
-    { id: 'payout', label: 'Payout', icon: Wallet },
     { id: 'payout-history', label: 'History', icon: Clock },
     { id: 'tax', label: 'Tax & Compliance', icon: FileText },
     { id: 'export', label: 'Export', icon: Download },
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-base dark:via-surface dark:to-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">
-              Earnings Dashboard
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
+      {/* Slim Premium Hero Section - Like Dashboard */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-900 dark:to-slate-900 px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+        {/* Animated background elements */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-40 w-72 h-72 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)]"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
+              <Wallet className="w-4 h-4 text-blue-200" />
+              <span className="text-sm font-semibold text-blue-100">Earnings Dashboard</span>
+            </div>
+            
+            <h1 className="text-4xl font-black text-white mb-3 leading-tight">
+              Your Earnings Dashboard
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Complete earnings analytics and management
+            
+            <p className="text-base text-blue-100">
+              Track, analyze, and manage your earnings with complete transparency and control.
             </p>
           </div>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Withdraw Button - Below Banner */}
+        <div className="mb-8">
           <button
-            onClick={() => navigate('/withdraw')}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent-500 hover:bg-accent-600 text-white font-semibold transition-colors"
+            onClick={() => setActiveTab('payout')}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold shadow-lg hover:shadow-xl transition-all"
           >
-            <CreditCard className="w-4 h-4" />
+            <CreditCard className="w-5 h-5" />
             Withdraw Funds
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="mb-8 rounded-lg bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-1 flex flex-wrap gap-1">
+        {/* Premium Tab Navigation */}
+        <div className="mb-12 rounded-2xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-1.5 flex flex-wrap gap-2 shadow-lg">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
+              className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 activeTab === id
-                  ? 'bg-accent-500 text-white'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>

@@ -1,10 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { PageLoader } from '@/components/shared/PageLoader'
-import KYCBanner from '@/components/kyc/KYCBanner'
-import KYCModal from '@/components/kyc/KYCModal'
 import { formatINR } from '@/utils/formatCurrency'
 import {
   ArrowRight,
@@ -28,6 +25,7 @@ import {
   Target,
   Trophy,
   ClipboardList,
+  ShoppingBag,
 } from 'lucide-react'
 import { requirementAPI } from '@/api/requirement.api'
 import { getRequirementProposals } from '@/api/proposal.api'
@@ -351,25 +349,6 @@ function LandingPage() {
 function ClientDashboardHome() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [showKYCModal, setShowKYCModal] = useState(false)
-
-  // Fetch KYC status
-  const { data: kycData = {}, refetch: refetchKYC } = useQuery({
-    queryKey: ['kycStatus'],
-    queryFn: async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/kyc/status', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        })
-        const result = await response.json()
-        return result.data || { status: 'pending' }
-      } catch {
-        return { status: 'pending' }
-      }
-    },
-  })
 
   // Fetch my requirements
   const { data: requirementsData = {}, isLoading: reqLoading } = useQuery({
@@ -409,119 +388,153 @@ function ClientDashboardHome() {
   const activeContracts = contracts.filter(c => c.status === 'active').length
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-base dark:to-surface py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">
-            Welcome back, {user?.name}! 👋
-          </h1>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
-            You have {activeProposals} new proposals and {activeContracts} active contracts
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
+      {/* Premium Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-900 dark:to-slate-900 px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+        {/* Animated background elements */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-32 -left-40 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_100%)]"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="max-w-3xl">
+            <h1 className="text-5xl font-black text-white mb-4 leading-tight">
+              Welcome back,<br/>
+              <span className="text-transparent bg-gradient-to-r from-blue-200 via-cyan-200 to-teal-200 bg-clip-text">{user?.name?.split(' ')[0] || 'Client'}</span>
+              <span className="text-4xl ml-2">🚀</span>
+            </h1>
+
+            <p className="text-base text-blue-100 max-w-2xl leading-relaxed">
+              Manage your projects efficiently with smart collaborations and transparent workflows.
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* KYC Banner */}
-        <KYCBanner
-          kycStatus={kycData?.status}
-          onStartKYC={() => setShowKYCModal(true)}
-        />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        {/* KYC Modal */}
-        {showKYCModal && (
-          <KYCModal
-            onClose={() => setShowKYCModal(false)}
-            onSuccess={() => {
-              refetchKYC()
-              setShowKYCModal(false)
-            }}
-          />
-        )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4 mb-8">
-          <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-white to-indigo-50 p-6 shadow-sm dark:border-gray-700 dark:bg-surface/80">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Projects</p>
-                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{requirements.length}</p>
+
+        {/* Stats Grid - Premium Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Active Requirements */}
+          <div className="group relative bg-gradient-to-br from-white to-blue-50/80 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-blue-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-blue-300/40 dark:hover:shadow-blue-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-blue-300 dark:hover:border-blue-600">
+            <div className="flex items-start justify-between mb-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-900/20 ring-1 ring-blue-200/70 dark:ring-blue-700/50">
+                <Briefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="rounded-lg bg-primary-100 p-3 dark:bg-slate-700/80">
-                <Briefcase className="h-6 w-6 text-primary-600 dark:text-cyan-300" />
-              </div>
+              <div className="text-2xl group-hover:scale-110 transition-transform duration-300">📋</div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold mb-2 uppercase tracking-wider">Active Requirements</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{requirements.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Posted</p>
+            <div className="mt-4 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style={{ width: '65%' }}></div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-accent-200 bg-gradient-to-br from-white to-accent-50 p-6 shadow-sm dark:border-gray-700 dark:bg-surface/80">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Spent</p>
-                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">₹{(requirements.reduce((sum, r) => sum + (r.budget || 0), 0) / 1000).toFixed(0)}k</p>
+          {/* Total Budget */}
+          <div className="group relative bg-gradient-to-br from-white to-emerald-50/80 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-emerald-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-emerald-300/40 dark:hover:shadow-emerald-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-emerald-300 dark:hover:border-emerald-600">
+            <div className="flex items-start justify-between mb-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/40 dark:to-emerald-900/20 ring-1 ring-emerald-200/70 dark:ring-emerald-700/50">
+                <WalletCards className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <div className="rounded-lg bg-accent-100 p-3 dark:bg-slate-700/80">
-                <WalletCards className="h-6 w-6 text-accent-600 dark:text-accent-300" />
-              </div>
+              <div className="text-2xl group-hover:scale-110 transition-transform duration-300">💰</div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold mb-2 uppercase tracking-wider">Total Budget</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">₹{(requirements.reduce((sum, r) => sum + (r.budget || 0), 0) / 100000).toFixed(1)}L</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Allocated</p>
+            <div className="mt-4 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-emerald-400 to-green-600 rounded-full" style={{ width: '70%' }}></div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-success/30 bg-gradient-to-br from-white to-green-50 p-6 shadow-sm dark:border-gray-700 dark:bg-surface/80">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Proposals Got</p>
-                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{proposals.length}</p>
+          {/* Proposals Received */}
+          <div className="group relative bg-gradient-to-br from-white to-purple-50/80 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-purple-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-purple-300/40 dark:hover:shadow-purple-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-purple-300 dark:hover:border-purple-600">
+            <div className="flex items-start justify-between mb-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/40 dark:to-purple-900/20 ring-1 ring-purple-200/70 dark:ring-purple-700/50">
+                <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <div className="rounded-lg bg-success/15 p-3 dark:bg-slate-700/80">
-                <TrendingUp className="h-6 w-6 text-success dark:text-emerald-400" />
-              </div>
+              <div className="text-2xl group-hover:scale-110 transition-transform duration-300">👥</div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold mb-2 uppercase tracking-wider">Proposals Received</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{proposals.length}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Total bids</p>
+            <div className="mt-4 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-purple-400 to-pink-600 rounded-full" style={{ width: '60%' }}></div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-6 shadow-sm dark:border-gray-700 dark:bg-surface/80">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Milestones</p>
-                <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{activeContracts}</p>
+          {/* Active Contracts */}
+          <div className="group relative bg-gradient-to-br from-white to-amber-50/80 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-amber-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-amber-300/40 dark:hover:shadow-amber-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-amber-300 dark:hover:border-amber-600">
+            <div className="flex items-start justify-between mb-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-900/20 ring-1 ring-amber-200/70 dark:ring-amber-700/50">
+                <Briefcase className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               </div>
-              <div className="rounded-lg bg-amber-100 p-3 dark:bg-slate-700/80">
-                <Clock className="h-6 w-6 text-amber-600 dark:text-amber-300" />
-              </div>
+              <div className="text-2xl group-hover:scale-110 transition-transform duration-300">⚡</div>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-xs font-bold mb-2 uppercase tracking-wider">Active Contracts</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-white mb-1">{activeContracts}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Ongoing</p>
+            <div className="mt-4 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-amber-400 to-orange-600 rounded-full" style={{ width: '75%' }}></div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">What's next?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             <button
               onClick={() => navigate('/se-market/post-requirement')}
-              className="rounded-xl border-2 border-primary-600 bg-white px-6 py-3 font-semibold text-primary-600 transition-all hover:bg-primary-50 dark:border-accent-500 dark:bg-surface dark:text-accent dark:hover:bg-slate-700"
+              className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl border border-blue-200/70 dark:border-slate-700 p-6 text-left hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-blue-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
-              + Post Requirement
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-3 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-sm text-slate-900 dark:text-white">Post Requirement</p>
+              <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">Get developer bids</p>
             </button>
+
             <button
               onClick={() => navigate('/browse/developers')}
-              className="rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-surface dark:text-gray-300 dark:hover:bg-slate-700"
+              className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-2xl border border-emerald-200/70 dark:border-slate-700 p-6 text-left hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-emerald-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
-              Search Developers
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-3 group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-sm text-slate-900 dark:text-white">Browse Developers</p>
+              <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">Explore talent pool</p>
             </button>
+
             <button
               onClick={() => navigate('/se-market/my-requirements')}
-              className="rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-surface dark:text-gray-300 dark:hover:bg-slate-700"
+              className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl border border-purple-200/70 dark:border-slate-700 p-6 text-left hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-purple-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
-              My Requirements
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mb-3 group-hover:scale-110 transition-transform duration-300">
+                <Target className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-sm text-slate-900 dark:text-white">My Requirements</p>
+              <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">Manage projects</p>
             </button>
+
             <button
               onClick={() => navigate('/dashboard/purchases')}
-              className="rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 dark:border-gray-600 dark:bg-surface dark:text-gray-300 dark:hover:bg-slate-700"
+              className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200/70 dark:border-slate-700 p-6 text-left hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl hover:shadow-amber-200/35 transition-all duration-300 hover:-translate-y-1 group"
             >
-              My Purchases
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 mb-3 group-hover:scale-110 transition-transform duration-300">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <p className="font-semibold text-sm text-slate-900 dark:text-white">My Purchases</p>
+              <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">Track orders</p>
             </button>
           </div>
         </div>
 
         {/* Your Active Requirements */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Active Requirements</h2>
             <Link
               to="/se-market/my-requirements"
@@ -535,36 +548,39 @@ function ClientDashboardHome() {
             {requirements.slice(0, 3).map((req) => (
               <div
                 key={req._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-600"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{req.title}</h3>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{req.description?.substring(0, 100)}...</p>
-                    <div className="mt-3 flex items-center gap-4">
-                      <span className="inline-flex items-center gap-1 text-sm font-medium">
-                        <span className="text-gray-700 dark:text-gray-300">Budget:</span>
-                        <span className="text-primary-600 dark:text-accent">₹{(req.budget / 1000).toFixed(0)}k</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-sm font-medium">
-                        <span className="text-gray-700 dark:text-gray-300">Status:</span>
-                        <span className="text-success">{req.status}</span>
-                      </span>
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-accent transition-colors">{req.title}</h3>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{req.description?.substring(0, 60)}...</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                      <Target className="w-3 h-3" />
+                      {req.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200/70 dark:border-slate-700/50">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Budget</p>
+                    <p className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">₹{(req.budget / 1000).toFixed(0)}k</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{req.proposals?.length || 0}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Proposals</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Proposals</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{req.proposals?.length || 0}</p>
                   </div>
                 </div>
               </div>
             ))}
             {!requirements.length && (
-              <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
-                <p className="text-gray-600 dark:text-gray-400">No active requirements yet</p>
+              <div className="rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Briefcase className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No active requirements yet</p>
                 <button
                   onClick={() => navigate('/se-market/post-requirement')}
-                  className="mt-4 inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 dark:text-accent"
+                  className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 dark:text-accent dark:hover:text-accent/80 font-semibold"
                 >
                   Post your first requirement →
                 </button>
@@ -574,8 +590,8 @@ function ClientDashboardHome() {
         </div>
 
         {/* Recent Proposals Received */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Proposals Received</h2>
             <Link
               to="/se-market/proposals-received"
@@ -589,43 +605,42 @@ function ClientDashboardHome() {
             {proposals.slice(0, 3).map((proposal) => (
               <div
                 key={proposal._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-600"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{proposal.developerId?.name}</h3>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{proposal.coverLetter?.substring(0, 100)}...</p>
-                    <div className="mt-3 flex items-center gap-4">
-                      <span className="inline-flex items-center gap-1 text-sm font-medium">
-                        <span className="text-gray-700 dark:text-gray-300">Bid:</span>
-                        <span className="text-primary-600 dark:text-accent font-bold">₹{(proposal.proposedPrice / 1000).toFixed(0)}k</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-sm font-medium">
-                        <span className="text-gray-700 dark:text-gray-300">Delivery:</span>
-                        <span>{proposal.deliveryDays} days</span>
-                      </span>
-                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-accent transition-colors">{proposal.developerId?.name || 'Unknown Developer'}</h3>
+                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{proposal.coverLetter?.substring(0, 60)}...</p>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    {proposal.status === 'pending' && (
-                      <button
-                        onClick={() => navigate(`/proposal/${proposal._id}`)}
-                        className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 transition-colors dark:bg-accent dark:hover:bg-accent/90"
-                      >
-                        Review
-                      </button>
-                    )}
-                    {proposal.status === 'accepted' && (
-                      <span className="inline-flex items-center gap-1 text-sm text-success font-medium">
-                        <CheckCircle2 className="h-4 w-4" /> Accepted
-                      </span>
-                    )}
+                  {proposal.status === 'pending' && (
+                    <button
+                      onClick={() => navigate(`/proposal/${proposal._id}`)}
+                      className="flex-shrink-0 rounded-lg bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-500 dark:to-accent-500 px-4 py-2 text-sm font-semibold text-white hover:shadow-lg transition-all hover:scale-105"
+                    >
+                      Review
+                    </button>
+                  )}
+                  {proposal.status === 'accepted' && (
+                    <div className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      <CheckCircle2 className="h-4 w-4" /> Accepted
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200/70 dark:border-slate-700/50">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Bid Amount</p>
+                    <p className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">₹{(proposal.proposedPrice / 1000).toFixed(0)}k</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Delivery</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">{proposal.deliveryDays} days</p>
                   </div>
                 </div>
               </div>
             ))}
             {!proposals.length && (
-              <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
+              <div className="rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Users className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
                 <p className="text-gray-600 dark:text-gray-400">No proposals yet. Post a requirement to get started!</p>
               </div>
             )}
@@ -633,8 +648,8 @@ function ClientDashboardHome() {
         </div>
 
         {/* Active Contracts Status */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-0">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Active Contracts Status</h2>
             <Link
               to="/dashboard/contracts"
@@ -648,54 +663,47 @@ function ClientDashboardHome() {
             {contracts.slice(0, 3).map((contract) => (
               <div
                 key={contract._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-600"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{contract.requirementId?.title}</h3>
-                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">with {contract.developerId?.name}</p>
-                    <div className="mt-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">
-                          {Math.round((contract.milestones?.filter(m => m.status === 'approved').length || 0) / (contract.milestones?.length || 1) * 100)}%
-                        </span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                        <div
-                          className="h-full bg-primary-600 dark:bg-accent transition-all"
-                          style={{
-                            width: `${Math.round((contract.milestones?.filter(m => m.status === 'approved').length || 0) / (contract.milestones?.length || 1) * 100)}%`,
-                          }}
-                        />
-                      </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-accent transition-colors">
+                      {contract.requirementId?.title || 'Active Contract'}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      with {contract.developerId?.name || 'Developer'}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      Active
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                </div>
+
+                {/* Milestones Progress */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Milestone Progress</span>
+                    <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                      {(contract.milestones?.filter(m => m.status === 'approved').length || 0)}/{contract.milestones?.length || 0}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden ring-1 ring-gray-300/50 dark:ring-gray-600/50">
+                    <div
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-blue-400 dark:to-cyan-400 h-2.5 rounded-full transition-all duration-500"
                       style={{
-                        backgroundColor: contract.status === 'active' ? '#dcfce7' : '#fef3c7',
-                        color: contract.status === 'active' ? '#15803d' : '#92400e',
+                        width: `${Math.round((contract.milestones?.filter(m => m.status === 'approved').length || 0) / (contract.milestones?.length || 1) * 100)}%`,
                       }}
-                    >
-                      {contract.status === 'active' ? (
-                        <>
-                          <div className="h-2 w-2 rounded-full bg-current" />
-                          Active
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="h-4 w-4" />
-                          {contract.status}
-                        </>
-                      )}
-                    </div>
+                    />
                   </div>
                 </div>
               </div>
             ))}
             {!contracts.length && (
-              <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
+              <div className="rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Briefcase className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
                 <p className="text-gray-600 dark:text-gray-400">No active contracts yet</p>
               </div>
             )}
@@ -710,25 +718,6 @@ function ClientDashboardHome() {
 function DeveloperDashboardHome() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [showKYCModal, setShowKYCModal] = useState(false)
-
-  // Fetch KYC status
-  const { data: kycData = {}, refetch: refetchKYC } = useQuery({
-    queryKey: ['kycStatus-dev'],
-    queryFn: async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/kyc/status', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        })
-        const result = await response.json()
-        return result.data || { status: 'pending' }
-      } catch {
-        return { status: 'pending' }
-      }
-    },
-  })
 
   // Fetch dashboard stats
   const { data: dashboardData } = useQuery({
@@ -837,57 +826,59 @@ function DeveloperDashboardHome() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {user?.name}! 👋
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Here's your development dashboard at a glance
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950">
+      {/* Premium Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-900 dark:to-slate-900 px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+        {/* Animated background elements */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-32 -left-40 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_100%)]"></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="max-w-3xl">
+            <h1 className="text-5xl font-black text-white mb-4 leading-tight">
+              Welcome back,<br/>
+              <span className="text-transparent bg-gradient-to-r from-blue-200 via-cyan-200 to-teal-200 bg-clip-text">{user?.name?.split(' ')[0] || 'Developer'}</span>
+              <span className="text-4xl ml-2">💪</span>
+            </h1>
+
+            <p className="text-base text-blue-100 max-w-2xl leading-relaxed">
+              Continue delivering excellence and watch your success grow exponentially.
+            </p>
+          </div>
         </div>
+      </div>
 
-        {/* KYC Banner */}
-        <KYCBanner
-          kycStatus={kycData?.status}
-          onStartKYC={() => setShowKYCModal(true)}
-        />
-
-        {/* KYC Modal */}
-        {showKYCModal && (
-          <KYCModal
-            onClose={() => setShowKYCModal(false)}
-            onSuccess={() => {
-              refetchKYC()
-              setShowKYCModal(false)
-            }}
-          />
-        )}
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Stats Grid - Premium Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {stats.map((stat, idx) => {
             const Icon = stat.icon
+            const colorMap = {
+              'from-emerald-500 to-teal-600': { border: 'emerald', icon: 'emerald' },
+              'from-amber-500 to-orange-600': { border: 'amber', icon: 'amber' },
+              'from-blue-500 to-cyan-600': { border: 'blue', icon: 'blue' },
+              'from-violet-500 to-purple-600': { border: 'violet', icon: 'violet' },
+            }
+            
             return (
               <div
                 key={idx}
-                className={`bg-gradient-to-br ${stat.bgGradient} rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow`}
+                className={`group relative bg-gradient-to-br ${stat.bgGradient} rounded-2xl border border-gray-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2`}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`bg-gradient-to-br ${stat.gradient} p-3 rounded-lg`}>
-                    <Icon className="w-5 h-5 text-white" />
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} bg-opacity-20 ring-1 ring-opacity-50`}>
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                    {stat.label}
-                  </span>
+                  <div className="text-2xl group-hover:scale-110 transition-transform duration-300">💰</div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                  {stat.suffix && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400">{stat.suffix}</p>
-                  )}
+                <p className="text-gray-600 dark:text-gray-400 text-xs font-bold mb-2 uppercase tracking-wider">{stat.label}</p>
+                <p className="text-3xl font-black text-gray-900 dark:text-white mb-1">{stat.value}</p>
+                {stat.suffix && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{stat.suffix}</p>
+                )}
+                <div className="mt-4 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className={`h-full bg-gradient-to-r ${stat.gradient} rounded-full`} style={{ width: '65%' }}></div>
                 </div>
               </div>
             )
@@ -895,18 +886,34 @@ function DeveloperDashboardHome() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">What's next?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {quickActions.map((action, idx) => {
               const Icon = action.icon
+              const gradients = [
+                { bg: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20', border: 'blue-200/70 dark:border-slate-700', icon: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', hover: 'hover:shadow-blue-200/35' },
+                { bg: 'from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20', border: 'emerald-200/70 dark:border-slate-700', icon: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', hover: 'hover:shadow-emerald-200/35' },
+                { bg: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20', border: 'purple-200/70 dark:border-slate-700', icon: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400', hover: 'hover:shadow-purple-200/35' },
+                { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'amber-200/70 dark:border-slate-700', icon: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400', hover: 'hover:shadow-amber-200/35' },
+              ]
+
               return (
                 <button
                   key={idx}
                   onClick={action.onClick}
-                  className="flex items-center justify-center gap-3 rounded-xl bg-white dark:bg-surface border border-gray-300 dark:border-gray-600 px-6 py-3 font-semibold text-gray-700 dark:text-gray-300 transition-all hover:bg-gray-50 dark:hover:bg-slate-700 shadow-sm hover:shadow-md"
+                  className={`bg-gradient-to-br ${gradients[idx].bg} rounded-2xl border ${gradients[idx].border} p-6 text-left hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-xl ${gradients[idx].hover} transition-all duration-300 hover:-translate-y-1 group`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{action.label}</span>
+                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${gradients[idx].icon} mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <p className="font-semibold text-sm text-slate-900 dark:text-white">{action.label}</p>
+                  <p className="text-xs text-slate-600 dark:text-gray-400 mt-1">
+                    {action.label === 'Opportunities' && 'Browse fresh opportunities'}
+                    {action.label === 'My Contracts' && 'Manage your work'}
+                    {action.label === 'View My Proposals' && 'Track submissions'}
+                    {action.label === 'Request Payout' && 'Manage earnings'}
+                  </p>
                 </button>
               )
             })}
@@ -914,8 +921,8 @@ function DeveloperDashboardHome() {
         </div>
 
         {/* Active Contracts */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Active Contracts</h2>
             <Link
               to="/dashboard/contracts"
@@ -929,38 +936,39 @@ function DeveloperDashboardHome() {
             {activeContracts.map((contract) => (
               <div
                 key={contract.id || contract._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1 hover:border-slate-300 dark:hover:border-slate-600"
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-accent transition-colors">
                       {contract.requirementTitle || contract.title || contract.requirementId?.title || 'Active Contract'}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       Client: {contract.clientName || contract.client?.name || contract.clientId?.name || 'Client'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-primary-600 dark:text-accent">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">
                       {formatINR(contract.totalAmount || contract.amount || 0)}
                     </p>
-                    <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                      {contract.status}
-                    </p>
+                    <div className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                      <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                      Active
+                    </div>
                   </div>
                 </div>
 
                 {/* Milestones Progress */}
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {(contract.completedMilestones ?? contract.milestones?.filter((milestone) => ['approved', 'released'].includes(milestone.status)).length) || 0}/{contract.totalMilestones || contract.milestones?.length || 0} milestones
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Milestone Progress</span>
+                    <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                      {(contract.completedMilestones ?? contract.milestones?.filter((milestone) => ['approved', 'released'].includes(milestone.status)).length) || 0}/{contract.totalMilestones || contract.milestones?.length || 0}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden ring-1 ring-gray-300/50 dark:ring-gray-600/50">
                     <div
-                      className="bg-gradient-to-r from-primary-500 to-accent rounded-full h-2 transition-all"
+                      className="bg-gradient-to-r from-blue-500 to-cyan-500 dark:from-blue-400 dark:to-cyan-400 h-2.5 rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.round((((contract.completedMilestones ?? contract.milestones?.filter((milestone) => ['approved', 'released'].includes(milestone.status)).length) || 0) / (contract.totalMilestones || contract.milestones?.length || 1)) * 100)}%`,
                       }}
@@ -971,9 +979,9 @@ function DeveloperDashboardHome() {
             ))}
 
             {!activeContracts.length && (
-              <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
-                <Briefcase className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-600 dark:text-gray-400 mb-3">No active contracts yet</p>
+              <div className="rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Briefcase className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No active contracts yet</p>
                 <button
                   onClick={() => navigate('/se-market')}
                   className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 dark:text-accent dark:hover:text-accent/80 font-semibold"
@@ -986,8 +994,8 @@ function DeveloperDashboardHome() {
         </div>
 
         {/* Matching Opportunities */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Matching Opportunities</h2>
             <Link
               to="/se-market"
@@ -997,34 +1005,34 @@ function DeveloperDashboardHome() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {opportunities.slice(0, 3).map((opportunity) => (
               <div
                 key={opportunity._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80 cursor-pointer hover:border-primary-300 dark:hover:border-accent/50"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-primary-300 dark:hover:border-accent/50 cursor-pointer"
                 onClick={() => navigate(`/se-market/requirement/${opportunity._id}`)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg flex-1">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg flex-1 group-hover:text-primary-600 dark:group-hover:text-accent transition-colors line-clamp-1">
                     {opportunity.title}
                   </h3>
-                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 rounded-full whitespace-nowrap">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full whitespace-nowrap flex-shrink-0">
                     <Target className="w-3 h-3" />
-                    {opportunity.difficulty}
+                    {opportunity.difficulty || 'Medium'}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 h-10">
                   {opportunity.description}
                 </p>
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200/70 dark:border-slate-700/50">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Budget</p>
-                    <p className="text-lg font-bold text-primary-600 dark:text-accent">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Budget</p>
+                    <p className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">
                       ₹{(opportunity.budget / 1000).toFixed(0)}k
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Proposals</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Proposals</p>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">
                       {opportunity.proposalCount || 0}
                     </p>
@@ -1034,9 +1042,9 @@ function DeveloperDashboardHome() {
             ))}
 
             {!opportunities.length && (
-              <div className="col-span-full rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
-                <Target className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-600 dark:text-gray-400 mb-3">No matching opportunities right now</p>
+              <div className="col-span-full rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Target className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
+                <p className="text-gray-600 dark:text-gray-400 mb-4">No matching opportunities right now</p>
                 <button
                   onClick={() => navigate('/se-market')}
                   className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 dark:text-accent dark:hover:text-accent/80 font-semibold"
@@ -1049,8 +1057,8 @@ function DeveloperDashboardHome() {
         </div>
 
         {/* Recent Feedback */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-0">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Feedback</h2>
             <Link
               to="/dashboard/reviews"
@@ -1064,20 +1072,20 @@ function DeveloperDashboardHome() {
             {reviews.map((review) => (
               <div
                 key={review._id}
-                className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow dark:border-gray-700 dark:bg-surface/80"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1"
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{review.reviewerName}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-accent transition-colors">{review.reviewerName}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      on {new Date(review.createdAt).toLocaleDateString('en-IN')}
+                      on {new Date(review.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
+                        className={`w-4 h-4 transition-colors ${
                           i < review.rating
                             ? 'fill-amber-400 text-amber-400'
                             : 'text-gray-300 dark:text-gray-600'
@@ -1086,13 +1094,13 @@ function DeveloperDashboardHome() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300">{review.comment}</p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{review.comment}</p>
               </div>
             ))}
 
             {!reviews.length && (
-              <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center dark:border-gray-600 dark:bg-surface/50">
-                <Trophy className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3" />
+              <div className="rounded-2xl border border-dashed border-gray-300 bg-gradient-to-b from-slate-50/50 to-slate-100/30 dark:border-gray-600 dark:bg-surface/50 p-12 text-center">
+                <Trophy className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-3 opacity-50" />
                 <p className="text-gray-600 dark:text-gray-400">No reviews yet. Complete your first contract to get feedback!</p>
               </div>
             )}

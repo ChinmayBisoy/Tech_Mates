@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationStore } from '@/store/notificationStore'
 import { useThemeStore } from '@/store/themeStore'
+import useOwnerStore from '@/store/ownerStore'
 import { 
   Menu, X, Moon, Sun, LogOut, Bell, Search, Settings, 
   HelpCircle, Shield, LayoutDashboard, User, LogIn, Zap
@@ -10,7 +11,8 @@ import {
 import { cn } from '@/utils/cn'
 
 export function Navbar() {
-  const { isAuthenticated, user, clearAuth } = useAuth()
+  const { isAuthenticated, user, clearAuth, hasHydrated: authHydrated } = useAuth()
+  const { isOwnerLoggedIn, ownerEmail, logoutOwner, _hasHydrated: ownerHydrated } = useOwnerStore()
   const { unreadCount } = useNotificationStore()
   const isDark = useThemeStore((state) => state.isDark)
   const toggleDarkMode = useThemeStore((state) => state.toggleDarkMode)
@@ -22,6 +24,12 @@ export function Navbar() {
   const navigate = useNavigate()
   const profileRef = useRef(null)
   const searchRef = useRef(null)
+
+  // Check if any user is authenticated (regular or owner)
+  const isUserAuthenticated = isAuthenticated || isOwnerLoggedIn
+  
+  // Wait for both stores to hydrate
+  const isHydrated = authHydrated && ownerHydrated
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -38,7 +46,12 @@ export function Navbar() {
   }, [])
 
   const handleLogout = () => {
-    clearAuth()
+    if (isOwnerLoggedIn) {
+      logoutOwner()
+      navigate('/')
+    } else {
+      clearAuth()
+    }
     setProfileOpen(false)
     setIsOpen(false)
   }
@@ -52,7 +65,7 @@ export function Navbar() {
     }
   }
 
-  const navLinks = isAuthenticated
+  const navLinks = isUserAuthenticated
     ? [
         { label: 'Projects', href: '/projects' },
         user?.role === 'developer' && { label: 'Opportunities', href: '/se-market' },
@@ -65,8 +78,8 @@ export function Navbar() {
           label: 'My Requirements',
           href: '/se-market/my',
         },
-        { label: 'Contracts', href: '/dashboard/contracts' },
-        { label: 'Chat', href: '/chat' },
+        !isOwnerLoggedIn && { label: 'Contracts', href: '/dashboard/contracts' },
+        !isOwnerLoggedIn && { label: 'Chat', href: '/chat' },
       ].filter(Boolean)
     : [
         { label: 'Projects', href: '/projects' },
@@ -107,7 +120,7 @@ export function Navbar() {
             ))}
             
             {/* Dashboard Link - Feature 3 */}
-            {isAuthenticated && (
+            {isUserAuthenticated && !isOwnerLoggedIn && (
               <Link
                 to="/dashboard"
                 className={cn(
@@ -121,12 +134,28 @@ export function Navbar() {
                 Dashboard
               </Link>
             )}
+
+            {/* Admin Dashboard Link for Owner */}
+            {isOwnerLoggedIn && (
+              <Link
+                to="/admin-dashboard"
+                className={cn(
+                  'text-sm font-medium transition-colors flex items-center gap-2',
+                  location.pathname === '/admin-dashboard'
+                    ? 'text-primary-600 dark:text-accent'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                )}
+              >
+                <Shield className="w-4 h-4" />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
             {/* Search Bar - Feature 4 */}
-            {isAuthenticated && (
+            {isUserAuthenticated && !isOwnerLoggedIn && (
               <div ref={searchRef} className="relative">
                 {searchOpen ? (
                   <form onSubmit={handleSearch} className="absolute right-0 top-1/2 -translate-y-1/2">
@@ -164,21 +193,23 @@ export function Navbar() {
               )}
             </button>
 
-            {isAuthenticated ? (
+            {isUserAuthenticated ? (
               <>
                 {/* Notification Bell - Feature 2 */}
-                <button
-                  onClick={() => navigate('/notifications')}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg transition-colors relative"
-                  aria-label="Notifications"
-                >
-                  <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-5 h-5 bg-danger rounded-full text-white text-xs flex items-center justify-center font-bold">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
+                {!isOwnerLoggedIn && (
+                  <button
+                    onClick={() => navigate('/notifications')}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg transition-colors relative"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-5 h-5 bg-danger rounded-full text-white text-xs flex items-center justify-center font-bold">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                )}
 
                 {/* User Profile Dropdown - Feature 1 */}
                 <div ref={profileRef} className="relative">
@@ -188,15 +219,15 @@ export function Navbar() {
                   >
                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs font-bold">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        {isOwnerLoggedIn ? 'A' : user?.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                     <div className="hidden sm:block text-sm">
                       <p className="text-gray-900 dark:text-white font-medium truncate max-w-xs">
-                        {user?.name}
+                        {isOwnerLoggedIn ? 'Admin' : user?.name}
                       </p>
                       <p className="text-gray-500 dark:text-gray-400 text-xs capitalize">
-                        {user?.role}
+                        {isOwnerLoggedIn ? 'Owner' : user?.role}
                       </p>
                     </div>
                   </button>
@@ -207,60 +238,65 @@ export function Navbar() {
                       {/* User Info */}
                       <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {user?.name}
+                          {isOwnerLoggedIn ? 'Admin' : user?.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                          {user?.role} Account
+                          {isOwnerLoggedIn ? `Owner (${ownerEmail})` : `${user?.role} Account`}
                         </p>
                       </div>
 
                       {/* Menu Items */}
                       <div className="py-2">
-                        {/* View Profile */}
-                        <Link
-                          to="/profile/me"
-                          onClick={() => setProfileOpen(false)}
-                          className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
-                        >
-                          <User className="w-4 h-4" />
-                          View Profile
-                        </Link>
-
-                        {/* Settings - Feature 5 */}
-                        <Link
-                          to="/settings"
-                          onClick={() => setProfileOpen(false)}
-                          className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
-                        >
-                          <Settings className="w-4 h-4" />
-                          Settings
-                        </Link>
-
-                        {/* Admin Panel - Feature 7 */}
-                        {user?.role === 'admin' && (
+                        {/* Regular User Menu Items */}
+                        {!isOwnerLoggedIn && (
                           <>
+                            {/* View Profile */}
+                            <Link
+                              to="/profile/me"
+                              onClick={() => setProfileOpen(false)}
+                              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                            >
+                              <User className="w-4 h-4" />
+                              View Profile
+                            </Link>
+
+                            {/* Settings - Feature 5 */}
+                            <Link
+                              to="/settings"
+                              onClick={() => setProfileOpen(false)}
+                              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                            >
+                              <Settings className="w-4 h-4" />
+                              Settings
+                            </Link>
+
+                            {/* Help & Support - Feature 6 */}
                             <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                             <Link
-                              to="/admin"
+                              to="/help"
                               onClick={() => setProfileOpen(false)}
-                              className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
                             >
-                              <Shield className="w-4 h-4" />
-                              Admin Panel
+                              <HelpCircle className="w-4 h-4" />
+                              Help & Support
                             </Link>
                           </>
                         )}
 
-                        {/* Help & Support - Feature 6 */}
-                        <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
-                        <Link
-                          to="/help"
-                          onClick={() => setProfileOpen(false)}
-                          className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
-                        >
-                          <HelpCircle className="w-4 h-4" />
-                          Help & Support
-                        </Link>
+                        {/* Owner Menu Items */}
+                        {isOwnerLoggedIn && (
+                          <>
+                            <Link
+                              to="/admin-dashboard"
+                              onClick={() => setProfileOpen(false)}
+                              className="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center gap-2 transition-colors"
+                            >
+                              <Shield className="w-4 h-4" />
+                              Admin Dashboard
+                            </Link>
+                            <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                          </>
+                        )}
 
                         {/* Logout */}
                         <button
@@ -275,8 +311,8 @@ export function Navbar() {
                   )}
                 </div>
               </>
-            ) : (
-              /* Auth Buttons */
+            ) : isHydrated ? (
+              /* Auth Buttons - Only show after hydration is complete */
               <div className="hidden sm:flex items-center gap-3">
                 <Link
                   to="/login"
@@ -292,7 +328,7 @@ export function Navbar() {
                   Sign Up
                 </Link>
               </div>
-            )}
+            ) : null}
 
             {/* Mobile Menu Button */}
             <button
@@ -333,7 +369,7 @@ export function Navbar() {
                   </Link>
                 ))}
                 
-                {isAuthenticated && (
+                {isUserAuthenticated && !isOwnerLoggedIn && (
                   <Link
                     to="/dashboard"
                     onClick={() => setIsOpen(false)}
@@ -343,36 +379,57 @@ export function Navbar() {
                     Dashboard
                   </Link>
                 )}
+                
+                {isOwnerLoggedIn && (
+                  <Link
+                    to="/admin-dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Admin Dashboard
+                  </Link>
+                )}
               </div>
 
               {/* Account Section */}
-              {isAuthenticated && (
+              {isUserAuthenticated && (
                 <>
                   <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                   <div className="px-4 py-2">
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                       Account
                     </p>
-                    <Link
-                      to="/profile/me"
-                      onClick={() => setIsOpen(false)}
-                      className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
-                    >
-                      <User className="w-4 h-4" />
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      onClick={() => setIsOpen(false)}
-                      className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Settings
-                    </Link>
+                    {!isOwnerLoggedIn && (
+                      <>
+                        <Link
+                          to="/profile/me"
+                          onClick={() => setIsOpen(false)}
+                          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                          <User className="w-4 h-4" />
+                          Profile
+                        </Link>
+                        <Link
+                          to="/settings"
+                          onClick={() => setIsOpen(false)}
+                          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Settings
+                        </Link>
+                      </>
+                    )}
+                    {isOwnerLoggedIn && (
+                      <div className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
+                        <p className="font-medium">Admin</p>
+                        <p className="text-xs text-gray-500">{ownerEmail}</p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Admin Section */}
-                  {user?.role === 'admin' && (
+                  {isOwnerLoggedIn && (
                     <>
                       <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                       <div className="px-4 py-2">
@@ -380,32 +437,36 @@ export function Navbar() {
                           Administration
                         </p>
                         <Link
-                          to="/admin"
+                          to="/admin-dashboard"
                           onClick={() => setIsOpen(false)}
-                          className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2 transition-colors"
+                          className="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg flex items-center gap-2 transition-colors"
                         >
                           <Shield className="w-4 h-4" />
-                          Admin Panel
+                          Admin Dashboard
                         </Link>
                       </div>
                     </>
                   )}
 
-                  {/* Support Section */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
-                  <div className="px-4 py-2">
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
-                      Support
-                    </p>
-                    <Link
-                      to="/help"
-                      onClick={() => setIsOpen(false)}
-                      className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
-                    >
-                      <HelpCircle className="w-4 h-4" />
-                      Help & Support
-                    </Link>
-                  </div>
+                  {/* Support Section (only for regular users) */}
+                  {!isOwnerLoggedIn && (
+                    <>
+                      <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+                      <div className="px-4 py-2">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                          Support
+                        </p>
+                        <Link
+                          to="/help"
+                          onClick={() => setIsOpen(false)}
+                          className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-elevated rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                          <HelpCircle className="w-4 h-4" />
+                          Help & Support
+                        </Link>
+                      </div>
+                    </>
+                  )}
 
                   {/* Logout */}
                   <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
@@ -423,7 +484,7 @@ export function Navbar() {
               )}
 
               {/* Auth Links */}
-              {!isAuthenticated && (
+              {!isUserAuthenticated && isHydrated && (
                 <>
                   <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                   <Link
