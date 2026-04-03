@@ -14,6 +14,7 @@ export function Dashboard() {
   if (user.role === 'admin') {
     return <Navigate to="/admin" replace />
   }
+
   if (user.role === 'client') {
     return <Navigate to="/user/dashboard" replace />
   }

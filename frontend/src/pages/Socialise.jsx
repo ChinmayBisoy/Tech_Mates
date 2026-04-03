@@ -177,12 +177,12 @@ export default function SocialisePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-cyan-50/60 dark:from-base dark:via-surface dark:to-gray-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="rounded-3xl border border-indigo-200/80 dark:border-gray-700 bg-gradient-to-r from-white via-indigo-50/70 to-cyan-50/70 dark:bg-surface p-6 shadow-xl shadow-indigo-200/40">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300 mb-2">
+        <div className="rounded-2xl border border-indigo-200/70 bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-8 shadow-xl shadow-indigo-200/60 dark:border-transparent dark:bg-none dark:p-0 dark:shadow-none">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100 mb-2">
             Socialise
           </p>
-          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-3">Build Your Network</h1>
-          <p className="text-slate-600 dark:text-gray-300 max-w-2xl">
+          <h1 className="text-4xl font-extrabold text-white mb-3">Build Your Network</h1>
+          <p className="text-indigo-100 max-w-2xl">
             Connect with {user?.role === 'developer' ? 'clients' : 'developers'}, send requests, and start conversations once connected.
           </p>
         </div>

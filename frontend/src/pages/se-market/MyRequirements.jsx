@@ -97,22 +97,25 @@ export default function MyRequirements() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 rounded-3xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.45)] backdrop-blur dark:border-gray-800 dark:bg-gray-900/80">
+        <div className="mb-8 rounded-2xl border border-indigo-200/70 bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-8 shadow-xl shadow-indigo-200/60 dark:border-transparent dark:bg-none dark:p-0 dark:shadow-none">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-2xl bg-primary/10 p-2.5 ring-1 ring-primary/20 dark:bg-accent/10 dark:ring-accent/20">
-                  <Briefcase className="h-8 w-8 text-black dark:text-accent stroke-[2.5]" />
+                <div className="rounded-2xl bg-white/15 p-2.5 ring-1 ring-white/35 backdrop-blur-sm">
+                  <Briefcase className="h-8 w-8 text-white stroke-[2.5]" />
                 </div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">My Requirements</h1>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100">Service Exchange Market</p>
+                  <h1 className="text-3xl font-extrabold tracking-tight text-white">My Requirements</h1>
+                </div>
               </div>
-              <p className="text-base text-slate-600 dark:text-slate-300">
+              <p className="text-base text-indigo-100">
                 Manage projects and view proposals from developers
               </p>
             </div>
             <button
               onClick={() => navigate('/se-market/post-requirement')}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 px-6 py-3 font-bold text-white shadow-md shadow-blue-700/30 transition-all hover:-translate-y-0.5 hover:from-blue-800 hover:to-blue-900 hover:shadow-lg hover:shadow-blue-800/40 dark:from-accent dark:to-accent/90"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/95 px-6 py-3 font-bold text-indigo-700 shadow-md shadow-indigo-900/20 transition-all hover:-translate-y-0.5 hover:bg-white"
             >
               <Plus className="h-5 w-5" />
               Post Requirement

@@ -177,18 +177,21 @@ export default function ProposalsReceived() {
       <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-indigo-300/25 blur-3xl dark:bg-indigo-500/10" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-3xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.45)] backdrop-blur dark:border-gray-800 dark:bg-gray-900/80">
+        <div className="mb-8 rounded-2xl border border-indigo-200/70 bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-8 shadow-xl shadow-indigo-200/60 dark:border-transparent dark:bg-none dark:p-0 dark:shadow-none">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <div className="mb-3 flex items-center gap-3">
-                <div className="rounded-2xl bg-primary/10 p-2.5 ring-1 ring-primary/20 dark:bg-accent/10 dark:ring-accent/20">
-                  <MessageSquare className="h-8 w-8 text-black dark:text-accent stroke-[2.5]" />
+                <div className="rounded-2xl bg-white/15 p-2.5 ring-1 ring-white/35 backdrop-blur-sm">
+                  <MessageSquare className="h-8 w-8 text-white stroke-[2.5]" />
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Proposals Received</h1>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100">Service Exchange Market</p>
+                  <h1 className="text-3xl font-bold tracking-tight text-white">Proposals Received</h1>
+                </div>
               </div>
-              <p className="text-sm text-slate-600 dark:text-slate-300">Review proposals submitted by developers for your requirements.</p>
+              <p className="text-sm text-indigo-100">Review proposals submitted by developers for your requirements.</p>
             </div>
-            <div className="inline-flex w-fit items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm dark:bg-accent/20 dark:text-accent">
+            <div className="inline-flex w-fit items-center rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm">
               {proposals.length} total
             </div>
           </div>

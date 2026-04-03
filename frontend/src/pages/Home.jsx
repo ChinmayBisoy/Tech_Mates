@@ -1009,11 +1009,11 @@ function DeveloperDashboardHome() {
             {opportunities.slice(0, 3).map((opportunity) => (
               <div
                 key={opportunity._id}
-                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-6 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-2 hover:border-primary-300 dark:hover:border-accent/50 cursor-pointer"
+                className="group relative bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-800 dark:to-slate-800/60 rounded-2xl border border-slate-200/70 dark:border-slate-700 p-5 shadow-lg hover:shadow-2xl hover:shadow-slate-300/40 dark:hover:shadow-slate-900/30 transition-all duration-500 hover:-translate-y-1 hover:border-primary-300 dark:hover:border-accent/50 cursor-pointer"
                 onClick={() => navigate(`/se-market/requirement/${opportunity._id}`)}
               >
                 <div className="flex items-start justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg flex-1 group-hover:text-primary-600 dark:group-hover:text-accent transition-colors line-clamp-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-base flex-1 group-hover:text-primary-600 dark:group-hover:text-accent transition-colors line-clamp-1">
                     {opportunity.title}
                   </h3>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full whitespace-nowrap flex-shrink-0">
@@ -1027,13 +1027,13 @@ function DeveloperDashboardHome() {
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200/70 dark:border-slate-700/50">
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Budget</p>
-                    <p className="text-lg font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">
+                    <p className="text-base font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent">
                       ₹{(opportunity.budget / 1000).toFixed(0)}k
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider font-medium">Proposals</p>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                    <p className="text-base font-bold text-gray-900 dark:text-white">
                       {opportunity.proposalCount || 0}
                     </p>
                   </div>

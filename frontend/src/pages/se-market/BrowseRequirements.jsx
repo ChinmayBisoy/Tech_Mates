@@ -39,13 +39,17 @@ export default function BrowseRequirements() {
       <div className="pointer-events-none absolute right-0 top-24 h-80 w-80 rounded-full bg-indigo-300/25 blur-3xl dark:bg-indigo-500/10" />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 rounded-3xl border border-white/70 bg-white/85 p-6 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.45)] backdrop-blur dark:border-gray-800 dark:bg-gray-900/80">
-          <p className="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-700 dark:text-slate-300">
-            <Clock3 className="h-4 w-4" />
-            Live Opportunities
-          </p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Open Opportunities</h1>
-          <p className="mt-2 text-base text-slate-600 dark:text-slate-300">Fresh requirements from teams looking for developers right now.</p>
+        <div className="mb-8 rounded-2xl border border-indigo-200/70 bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-8 shadow-xl shadow-indigo-200/60 dark:border-transparent dark:bg-none dark:p-0 dark:shadow-none">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="rounded-2xl bg-white/15 p-2.5 ring-1 ring-white/35 backdrop-blur-sm">
+              <Clock3 className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-100">Live Opportunities</p>
+              <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Open Opportunities</h1>
+            </div>
+          </div>
+          <p className="mt-2 text-base text-indigo-100">Fresh requirements from teams looking for developers right now.</p>
         </div>
 
         {isLoading ? (

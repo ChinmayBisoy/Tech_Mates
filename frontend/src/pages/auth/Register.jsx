@@ -6,13 +6,16 @@ import { RoleSelector } from '@/components/auth/RoleSelector'
 import { RegisterForm } from '@/components/auth/RegisterForm'
 
 export function Register() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isProfileComplete, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialRole = searchParams.get('role') || null
   const [selectedRole, setSelectedRole] = useState(initialRole)
 
   if (isAuthenticated) {
+    if (!isAdmin && !isProfileComplete) {
+      return <Navigate to="/profile/setup" replace />
+    }
     return <Navigate to="/dashboard" replace />
   }
 

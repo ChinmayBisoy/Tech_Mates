@@ -46,8 +46,10 @@ export function CollapsibleNavbar() {
   const [profileOpen, setProfileOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+  const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/messages')
   const navRef = useRef(null)
   const profileRef = useRef(null)
+  const contentScrollRef = useRef(null)
 
   const handleLogout = () => {
     logout()
@@ -68,6 +70,15 @@ export function CollapsibleNavbar() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    // The app uses an internal scroll container for page content.
+    // Reset both container and window scroll on route changes.
+    if (contentScrollRef.current && !isChatRoute) {
+      contentScrollRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [location.pathname, location.search, isChatRoute])
 
   const publicNavItems = [
     { icon: Home, label: 'Home', path: '/', public: true },
@@ -150,7 +161,6 @@ export function CollapsibleNavbar() {
   ]
 
   const dashboardPath = '/dashboard'
-  const isChatRoute = location.pathname.startsWith('/chat') || location.pathname.startsWith('/messages')
   const shouldShowChatDot = unreadMessageNotificationCount > 0 && !isChatRoute
 
   const isActive = (path) => location.pathname === path
@@ -503,7 +513,7 @@ export function CollapsibleNavbar() {
           'flex-1 transition-all duration-300 flex flex-col min-h-[calc(100vh-64px)]',
           isMobileOpen ? 'ml-0' : isHovered ? 'md:ml-64' : 'md:ml-20'
         )}>
-          <div className={cn('flex-1', isChatRoute ? 'overflow-hidden' : 'overflow-auto')}>
+          <div ref={contentScrollRef} className={cn('flex-1', isChatRoute ? 'overflow-hidden' : 'overflow-auto')}>
             <Outlet />
           </div>
           {!isChatRoute && <Footer />}

@@ -18,7 +18,7 @@ import { cn } from '@/utils/cn';
 const contractStatusConfig = {
   active: {
     label: 'Active',
-    badge: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900',
+    badge: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900',
     icon: Clock,
   },
   completed: {
