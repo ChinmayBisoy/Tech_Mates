@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RoleRoute } from './RoleRoute'
@@ -72,7 +72,6 @@ const Phase10Page = lazy(() => import('@/pages/Phase10Page'))
 
 // Lazy imports for Subscription
 const SubscriptionPage = lazy(() => import('@/pages/Subscription'))
-const SubscriptionCheckoutPage = lazy(() => import('@/pages/SubscriptionCheckout'))
 const SubscriptionSuccessPage = lazy(() => import('@/pages/SubscriptionSuccess'))
 
 // Lazy import for Earnings
@@ -492,9 +491,7 @@ const router = createBrowserRouter([
         path: 'subscription/checkout/:planId',
         element: (
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <SubscriptionCheckoutPage />
-            </Suspense>
+            <Navigate to="/payments/subscription" replace />
           </ProtectedRoute>
         ),
       },
