@@ -69,6 +69,11 @@ const SellerVerificationPage_Phase10 = lazy(() => import('@/pages/SellerVerifica
 // Lazy imports for Phase 10.4-10.10 - Enhanced Shopping Experience
 const Phase10Page = lazy(() => import('@/pages/Phase10Page'))
 
+// Lazy imports for Subscription
+const SubscriptionPage = lazy(() => import('@/pages/Subscription'))
+const SubscriptionCheckoutPage = lazy(() => import('@/pages/SubscriptionCheckout'))
+const SubscriptionSuccessPage = lazy(() => import('@/pages/SubscriptionSuccess'))
+
 // Stub page component for routes being built in other phases
 const StubPage = ({ title }) => (
   <div className="min-h-screen flex items-center justify-center">
@@ -431,7 +436,33 @@ const router = createBrowserRouter([
       },
       {
         path: 'payments/subscription',
-        element: <StubPage title="Subscription" />,
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <SubscriptionPage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'subscription/checkout/:planId',
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <SubscriptionCheckoutPage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'subscription/success',
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <SubscriptionSuccessPage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'payments/withdraw',

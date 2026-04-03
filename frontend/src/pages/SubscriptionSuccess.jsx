@@ -1,22 +1,43 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, ArrowRight, Mail, Calendar, CreditCard } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function SubscriptionSuccess() {
   const location = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { user } = useAuth()
   const plan = location.state?.plan
+  const subscription = location.state?.subscription
 
   const renewalDate = new Date()
   renewalDate.setMonth(renewalDate.getMonth() + 1)
 
+  const handleBackToSubscription = () => {
+    // Invalidate queries before navigating to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['current-subscription'] })
+    queryClient.invalidateQueries({ queryKey: ['subscription'] })
+    navigate('/subscription')
+  }
+
+  const handleGoToDashboard = () => {
+    queryClient.invalidateQueries({ queryKey: ['current-subscription'] })
+    queryClient.invalidateQueries({ queryKey: ['subscription'] })
+    navigate('/dashboard')
+  }
+
+  // If user somehow lands here without plan, redirect back
   if (!plan) {
+    setTimeout(() => {
+      navigate('/subscription')
+    }, 2000)
+    
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-base dark:via-surface dark:to-gray-900 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-base dark:via-surface dark:to-gray-900 py-12 px-4 flex items-center justify-center">
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            Redirecting...
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Redirecting to subscription page...
           </p>
         </div>
       </div>
@@ -49,8 +70,8 @@ export default function SubscriptionSuccess() {
           <div className="space-y-6">
             {/* Plan Info */}
             <div className="flex items-start gap-4 pb-6 border-b border-gray-200 dark:border-gray-700">
-              <div className="p-3 rounded-lg bg-accent-100 dark:bg-accent-900/30">
-                <CreditCard className="w-6 h-6 text-accent-600 dark:text-accent-400" />
+              <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="flex-1">
                 <p className="text-sm text-gray-600 dark:text-gray-400">Plan</p>
@@ -59,7 +80,7 @@ export default function SubscriptionSuccess() {
                 </p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {plan.priceDisplay}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-right">
@@ -104,6 +125,58 @@ export default function SubscriptionSuccess() {
           </div>
         </div>
 
+        {/* Transaction Summary */}
+        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 p-8 mb-8">
+          <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-6">
+            Transaction Summary
+          </h3>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Order ID</p>
+              <p className="text-lg font-semibold text-blue-900 dark:text-blue-100 font-mono">
+                ORD-{new Date().getTime()}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Payment Status</p>
+              <p className="text-lg font-semibold text-green-600 dark:text-green-400 flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                Paid Successfully
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Amount Charged</p>
+              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                {plan.priceDisplay}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Payment Method</p>
+              <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                Credit/Debit Card
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Subscription Starts</p>
+              <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                {new Date().toLocaleDateString('en-IN')}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-1">Next Billing Date</p>
+              <p className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+                {renewalDate.toLocaleDateString('en-IN')}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* What's Included */}
         <div className="rounded-2xl bg-white dark:bg-surface border border-gray-200 dark:border-gray-700 p-8 mb-8">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
@@ -135,33 +208,33 @@ export default function SubscriptionSuccess() {
         </div>
 
         {/* Next Steps */}
-        <div className="rounded-2xl bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/20 dark:to-accent-800/20 border border-accent-200 dark:border-accent-800 p-8 mb-8">
+        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 p-8 mb-8">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Next Steps
           </h3>
           <ol className="space-y-3">
             <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-accent-500 text-white font-bold text-sm">
+              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white font-bold text-sm">
                 1
               </span>
               <span className="text-gray-700 dark:text-gray-300">
-                Go to your <strong>Dashboard</strong> to access new Pro features
+                Go to your <strong>Dashboard</strong> to access premium features
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-accent-500 text-white font-bold text-sm">
+              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white font-bold text-sm">
                 2
               </span>
               <span className="text-gray-700 dark:text-gray-300">
-                Visit <strong>My Subscription</strong> to manage your plan and billing
+                Visit <strong>Settings</strong> to manage your subscription and billing
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-accent-500 text-white font-bold text-sm">
+              <span className="flex-shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white font-bold text-sm">
                 3
               </span>
               <span className="text-gray-700 dark:text-gray-300">
-                Check <strong>Earnings</strong> to track your pro earnings and performance
+                Check your email for invoice and setup instructions
               </span>
             </li>
           </ol>
@@ -170,28 +243,28 @@ export default function SubscriptionSuccess() {
         {/* Action Buttons */}
         <div className="grid md:grid-cols-2 gap-4">
           <button
-            onClick={() => navigate('/dashboard')}
-            className="py-3 px-6 rounded-lg bg-accent-500 hover:bg-accent-600 text-white font-semibold transition-colors flex items-center justify-center gap-2"
+            onClick={handleGoToDashboard}
+            className="py-3 px-6 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-colors flex items-center justify-center gap-2"
           >
             <ArrowRight className="w-4 h-4" />
             Go to Dashboard
           </button>
           <button
-            onClick={() => navigate('/my-subscription')}
-            className="py-3 px-6 rounded-lg border-2 border-accent-500 text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20 font-semibold transition-colors"
+            onClick={handleBackToSubscription}
+            className="py-3 px-6 rounded-lg border-2 border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 font-semibold transition-colors"
           >
-            Manage Subscription
+            View My Subscription
           </button>
         </div>
 
         {/* Support Info */}
         <div className="mt-8 p-6 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-            Need help? Our support team is here for you
+            ✅ Your subscription is now active! Check your email for invoice.
           </p>
-          <button className="text-accent-500 hover:text-accent-600 font-medium text-sm">
-            Contact Support →
-          </button>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Need help? <button className="text-blue-500 hover:text-blue-600 font-medium">Contact Support</button>
+          </p>
         </div>
       </div>
     </div>

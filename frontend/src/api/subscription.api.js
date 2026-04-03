@@ -1,37 +1,39 @@
 import axios from '@/api/axios'
 
-// Subscription pricing plans
+// Subscription pricing plans in Indian Rupees (INR)
 export const SUBSCRIPTION_PLANS = [
   {
-    name: 'Free Tier',
+    name: 'Free',
     id: 'free',
     price: 0,
-    priceDisplay: 'Free',
+    priceDisplay: '₹0',
+    priceNumber: 0,
     period: 'always',
     billingCycle: 'No credit card required',
-    description: 'Get started with basic features',
+    description: 'Perfect for getting started',
     features: [
       'Up to 2 active project listings',
       'Basic analytics dashboard',
       'Email support',
       'Standard visibility in search',
-      'Monthly promotion credits',
     ],
     limitations: [
       '❌ No advanced analytics',
       '❌ Limited to 2 listings',
       '❌ Standard support only',
-      '❌ No API access',
+      '❌ No priority features',
     ],
-    cta: 'Get Started',
+    cta: 'Current Plan',
     popular: false,
     badge: null,
+    color: 'gray',
   },
   {
-    name: 'Pro Tier',
+    name: 'Pro',
     id: 'pro',
-    price: 999, // In cents ($9.99)
-    priceDisplay: '$9.99',
+    price: 83900, // In paise (₹839 = 83900 paise)
+    priceDisplay: '₹839',
+    priceNumber: 839,
     period: 'month',
     billingCycle: 'Billed monthly, cancel anytime',
     description: 'Best for growing developers',
@@ -41,41 +43,46 @@ export const SUBSCRIPTION_PLANS = [
       'Priority email & chat support',
       'Custom branding on listings',
       'Buyer contact information access',
-      'Monthly promotion credits ($50)',
+      'Monthly promotion credits (₹500)',
       'Profile verification badge',
       'Enhanced profile visibility',
+      'Monthly webinars & resources',
     ],
-    cta: 'Start Pro',
+    cta: 'Upgrade to Pro',
     popular: true,
     badge: 'POPULAR',
-    savings: null,
+    color: 'blue',
+    savings: '10% off annual',
   },
   {
-    name: 'Max Tier',
+    name: 'Max',
     id: 'max',
-    price: 4999, // In cents ($49.99)
-    priceDisplay: '$49.99',
+    price: 414500, // In paise (₹4,145 = 414500 paise)
+    priceDisplay: '₹4,145',
+    priceNumber: 4145,
     period: 'month',
     billingCycle: 'Billed monthly, cancel anytime',
-    description: 'For professional agencies & high-earners',
+    description: 'For professionals & agencies',
     features: [
       'Everything in Pro +',
       'Unlimited listings with priority placement',
       'AI-powered project matching',
       'Dedicated account manager',
-      '24/7 phone & priority support',
-      'Quarterly promotion credits ($300)',
+      '24/7 priority phone support',
+      'Quarterly promotion credits (₹3,000)',
       'Platinum profile badge',
       'Premium profile visibility',
       'Advanced API access',
       'Custom integration support',
-      'White-label options',
-      'Team management (5 members)',
+      'White-label profile options',
+      'Team management (up to 5 members)',
+      'Monthly consulting hour',
     ],
-    cta: 'Start Max',
+    cta: 'Upgrade to Max',
     popular: false,
     badge: 'ELITE',
-    savings: null,
+    color: 'purple',
+    savings: '15% off annual',
   },
 ]
 
@@ -89,10 +96,10 @@ export const getSubscriptionPlans = async () => {
 }
 
 // Create subscription (upgrade to pro)
-export const upgradeSubscription = async (plan) => {
+export const upgradeSubscription = async (planId) => {
   try {
     const response = await axios.post('/api/subscriptions/upgrade', {
-      plan,
+      planId,
     })
     return response.data.data
   } catch (error) {
@@ -105,7 +112,7 @@ export const upgradeSubscription = async (plan) => {
           resolve({
             success: true,
             message: 'Subscription upgraded successfully (mock)',
-            plan: plan.plan || plan,
+            planId: planId,
             status: 'active',
             currentPeriodStart: new Date(),
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),

@@ -6,39 +6,75 @@ const emailService = require('./email.service');
 
 const unixToDate = (value) => (value ? new Date(value * 1000) : null);
 
-const resolvePlanConfig = (plan) => {
-  if (plan === 'monthly') {
-    return {
-      priceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
-      amount: Number(process.env.STRIPE_PRO_MONTHLY_AMOUNT || 0),
-    };
-  }
-
-  if (plan === 'yearly') {
-    return {
-      priceId: process.env.STRIPE_PRO_YEARLY_PRICE_ID,
-      amount: Number(process.env.STRIPE_PRO_YEARLY_AMOUNT || 0),
-    };
-  }
-
-  throw new ApiError(400, 'Invalid plan selected');
+// Plan pricing configuration in paise (100 paise = ₹1)
+const PLAN_CONFIG = {
+  free: {
+    priceId: null, // No Stripe charge for free tier
+    amountPaise: 0, // ₹0
+  },
+  pro: {
+    priceId: process.env.STRIPE_PRO_PRICE_ID,
+    amountPaise: 8390000, // ₹839 = 83,900 paise
+  },
+  max: {
+    priceId: process.env.STRIPE_MAX_PRICE_ID,
+    amountPaise: 41450000, // ₹4,145 = 414,500 paise
+  },
 };
 
-const createSubscription = async (userId, plan) => {
+const resolvePlanConfig = (planId) => {
+  if (!['free', 'pro', 'max'].includes(planId)) {
+    throw new ApiError(400, 'Invalid plan selected');
+  }
+
+  const config = PLAN_CONFIG[planId];
+  if (!config) {
+    throw new ApiError(500, 'Plan configuration not found');
+  }
+
+  // For paid tiers, Stripe price ID must be configured
+  if (planId !== 'free' && !config.priceId) {
+    throw new ApiError(500, `Stripe price is not configured for ${planId} plan`);
+  }
+
+  return config;
+};
+
+const createSubscription = async (userId, planId) => {
   const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
 
-  if (!['monthly', 'yearly'].includes(plan)) {
-    throw new ApiError(400, 'Plan must be monthly or yearly');
+  const config = resolvePlanConfig(planId);
+
+  // For free tier, no Stripe payment needed
+  if (planId === 'free') {
+    const subscription = await Subscription.create({
+      userId,
+      stripeSubscriptionId: `free-${Date.now()}`, // Generate mock ID for free tier
+      stripeCustomerId: 'free-tier',
+      plan: planId,
+      status: 'active',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year for free tier
+      cancelAtPeriodEnd: false,
+      priceId: null,
+      amount: 0,
+    });
+
+    user.subscription = planId;
+    user.subscriptionId = subscription._id;
+    user.subscriptionStatus = 'active';
+    await user.save();
+
+    return {
+      subscription,
+      message: 'Free tier subscription activated',
+    };
   }
 
-  const { priceId, amount } = resolvePlanConfig(plan);
-  if (!priceId) {
-    throw new ApiError(500, 'Stripe price is not configured for selected plan');
-  }
-
+  // For paid tiers, create Stripe subscription
   let stripeCustomerId = user.stripeCustomerId;
   if (!stripeCustomerId) {
     const customer = await stripe.customers.create({
@@ -55,7 +91,7 @@ const createSubscription = async (userId, plan) => {
 
   const stripeSubscription = await stripe.subscriptions.create({
     customer: stripeCustomerId,
-    items: [{ price: priceId }],
+    items: [{ price: config.priceId }],
     payment_behavior: 'default_incomplete',
     expand: ['latest_invoice.payment_intent'],
   });
@@ -67,19 +103,19 @@ const createSubscription = async (userId, plan) => {
     userId,
     stripeSubscriptionId: stripeSubscription.id,
     stripeCustomerId,
-    plan,
+    plan: planId,
     status: 'active',
     currentPeriodStart,
     currentPeriodEnd,
     cancelAtPeriodEnd: Boolean(stripeSubscription.cancel_at_period_end),
-    priceId,
-    amount,
+    priceId: config.priceId,
+    amount: config.amountPaise / 100, // Convert paise to rupees for storage
   });
 
-  user.isPro = true;
-  user.proSubscriptionId = stripeSubscription.id;
-  user.proExpiresAt = currentPeriodEnd;
-  user.proGracePeriodEndsAt = null;
+  user.subscription = planId;
+  user.subscriptionId = subscription._id;
+  user.subscriptionStatus = 'active';
+  user.subscriptionExpiresAt = currentPeriodEnd;
   await user.save();
 
   const clientSecret = stripeSubscription.latest_invoice?.payment_intent?.client_secret;
@@ -87,6 +123,7 @@ const createSubscription = async (userId, plan) => {
   return {
     clientSecret,
     subscription,
+    message: `${planId} subscription created successfully`,
   };
 };
 
@@ -97,6 +134,26 @@ const cancelSubscription = async (userId) => {
     throw new ApiError(404, 'Active subscription not found');
   }
 
+  // For free tier, just mark as cancelled
+  if (subscription.plan === 'free') {
+    subscription.status = 'cancelled';
+    subscription.cancelledAt = new Date();
+    await subscription.save();
+
+    const user = await User.findById(userId);
+    if (user) {
+      user.subscription = null;
+      user.subscriptionId = null;
+      user.subscriptionStatus = null;
+      await user.save();
+    }
+
+    return {
+      message: 'Free tier subscription cancelled',
+    };
+  }
+
+  // For paid tiers, use Stripe
   await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
     cancel_at_period_end: true,
   });
@@ -108,7 +165,7 @@ const cancelSubscription = async (userId) => {
   if (user?.email) {
     await emailService.sendEmail(
       user.email,
-      'TechMates Pro cancellation scheduled',
+      `TechMates ${subscription.plan} subscription cancellation scheduled`,
       `Your subscription will end at period end: ${subscription.currentPeriodEnd}`,
       `<p>Your subscription will end at period end: <strong>${subscription.currentPeriodEnd}</strong></p>`
     );
