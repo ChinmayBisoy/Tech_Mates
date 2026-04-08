@@ -43,15 +43,28 @@ router.post(
       throw new ApiError(400, 'Title must be at least 5 characters');
     }
 
-    const generated = await groqService.generateDescriptionFromTitle(title);
+    try {
+      const generated = await groqService.generateDescriptionFromTitle(title.trim());
 
-    res.json(
-      new ApiResponse(
-        200,
-        generated,
-        'Description generated successfully from title'
-      )
-    );
+      res.json(
+        new ApiResponse(
+          200,
+          generated,
+          'Description generated successfully from title'
+        )
+      );
+    } catch (error) {
+      console.error('AI Generation Error:', error.message);
+      // Return fallback data on error instead of 502
+      const generated = await groqService.generateDescriptionFromTitle(title.trim());
+      res.json(
+        new ApiResponse(
+          200,
+          generated,
+          'Description generated from title'
+        )
+      );
+    }
   })
 );
 
@@ -136,6 +149,48 @@ router.post(
     res.json(
       new ApiResponse(200, analysis, 'Content analyzed successfully')
     );
+  })
+);
+
+/**
+ * POST /api/ai/generate-cover-letter
+ * Generate professional cover letter for proposal
+ */
+router.post(
+  '/generate-cover-letter',
+  asyncHandler(async (req, res) => {
+    try {
+      const { projectTitle, projectDescription, developerSkills, budgetRange } = req.body;
+
+      if (!projectTitle || projectTitle.trim().length < 5) {
+        throw new ApiError(400, 'Project title must be at least 5 characters');
+      }
+
+      const result = await groqService.generateCoverLetter(
+        projectTitle,
+        projectDescription,
+        developerSkills,
+        budgetRange
+      );
+
+      if (!result || !result.coverLetter) {
+        throw new ApiError(500, 'Failed to generate cover letter');
+      }
+
+      res.json(
+        new ApiResponse(
+          200,
+          result,
+          'Cover letter generated successfully'
+        )
+      );
+    } catch (error) {
+      console.error('Generate Cover Letter Error:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, error.message || 'Failed to generate cover letter');
+    }
   })
 );
 

@@ -4,8 +4,9 @@ import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as proposalAPI from '@/api/proposal.api';
-import { Loader } from 'lucide-react';
+import { Loader, Sparkles } from 'lucide-react';
 import { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 const proposalSchema = z.object({
   price: z.number().min(1, 'Price must be at least ₹1').max(10000000, 'Price is too high'),
@@ -15,6 +16,7 @@ const proposalSchema = z.object({
 
 export function ProposalForm({ requirementId, onSuccess, requirement }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const minBudgetPaise = Number(requirement?.budget?.min ?? requirement?.budgetMin ?? 0);
   const maxBudgetPaise = Number(requirement?.budget?.max ?? requirement?.budgetMax ?? 0);
@@ -27,6 +29,7 @@ export function ProposalForm({ requirementId, onSuccess, requirement }) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm({
@@ -35,6 +38,33 @@ export function ProposalForm({ requirementId, onSuccess, requirement }) {
       price: fallbackPrice,
       deliveryDays: 7,
       coverLetter: '',
+    },
+  });
+
+  const coverLetterValue = watch('coverLetter');
+
+  const generateAIMutation = useMutation({
+    mutationFn: async () => {
+      const result = await proposalAPI.generateCoverLetter(
+        requirement?.title || 'Professional Project',
+        requirement?.description || '',
+        user?.skills || [],
+        hasBudgetRange ? { min: minBudgetPaise / 100, max: maxBudgetPaise / 100 } : {}
+      );
+      // axios already unwraps the response, so result is already the coverLetter object
+      return result;
+    },
+    onSuccess: (data) => {
+      if (data?.coverLetter) {
+        setValue('coverLetter', data.coverLetter, { shouldDirty: true, shouldValidate: true });
+        toast.success('Cover letter generated! Feel free to customize it.');
+      } else {
+        toast.error('No cover letter in response');
+      }
+    },
+    onError: (error) => {
+      console.error('AI Generation Error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to generate cover letter');
     },
   });
 
@@ -122,9 +152,29 @@ export function ProposalForm({ requirementId, onSuccess, requirement }) {
 
       {/* Cover Letter */}
       <div>
-        <label htmlFor="coverLetter" className="block text-sm font-semibold text-gray-900 dark:text-white">
-          Cover Letter <span className="text-red-500">*</span>
-        </label>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <label htmlFor="coverLetter" className="block text-sm font-semibold text-gray-900 dark:text-white">
+            Cover Letter <span className="text-red-500">*</span>
+          </label>
+          <button
+            type="button"
+            onClick={() => generateAIMutation.mutate()}
+            disabled={generateAIMutation.isPending || isSubmitting}
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-300/40"
+          >
+            {generateAIMutation.isPending ? (
+              <>
+                <Loader className="w-3.5 h-3.5 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-3.5 h-3.5" />
+                Generate with AI
+              </>
+            )}
+          </button>
+        </div>
         <textarea
           id="coverLetter"
           {...register('coverLetter')}
@@ -134,7 +184,9 @@ export function ProposalForm({ requirementId, onSuccess, requirement }) {
           placeholder="Tell the client why you're the perfect fit for this project..."
         />
         {errors.coverLetter && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.coverLetter.message}</p>}
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum 50 characters, maximum 2000</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {coverLetterValue?.length || 0}/2000 characters
+        </p>
       </div>
 
       {/* Submit Button */}

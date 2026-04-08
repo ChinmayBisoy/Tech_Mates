@@ -98,7 +98,7 @@ export const getSubscriptionPlans = async () => {
 // Create subscription (upgrade to pro)
 export const upgradeSubscription = async (planId) => {
   try {
-    const response = await axios.post('/api/subscriptions/upgrade', {
+    const response = await axios.post('/subscriptions/upgrade', {
       planId,
     })
     return response.data.data
@@ -127,7 +127,7 @@ export const upgradeSubscription = async (planId) => {
 // Get current subscription
 export const getSubscription = async () => {
   try {
-    const response = await axios.get('/api/subscriptions')
+    const response = await axios.get('/subscriptions')
     return response.data.data
   } catch (error) {
     // 404 is expected if user has no subscription
@@ -141,7 +141,7 @@ export const getSubscription = async () => {
 // Cancel subscription
 export const cancelSubscription = async () => {
   try {
-    const response = await axios.delete('/api/subscriptions/cancel')
+    const response = await axios.delete('/subscriptions/cancel')
     return response.data.data
   } catch (error) {
     // If backend not ready, simulate mock cancellation

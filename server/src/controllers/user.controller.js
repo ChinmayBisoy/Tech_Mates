@@ -105,37 +105,104 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const uploadAvatar = asyncHandler(async (req, res) => {
-  if (!req.file || !req.file.buffer) {
-    throw new ApiError(400, 'Avatar file is required');
-  }
+  try {
+    if (!req.file || !req.file.buffer) {
+      throw new ApiError(400, 'Avatar file is required');
+    }
 
-  const uploadResult = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: 'techmates/avatars',
-        resource_type: 'image',
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(result);
+    if (!req.user || !req.user._id) {
+      throw new ApiError(401, 'User authentication required');
+    }
+
+    // Validate file size (max 5MB)
+    if (req.file.size > 5 * 1024 * 1024) {
+      throw new ApiError(400, 'Avatar file must be less than 5MB');
+    }
+
+    // Validate file type
+    if (!req.file.mimetype || !req.file.mimetype.startsWith('image/')) {
+      throw new ApiError(400, 'Only image files are allowed');
+    }
+
+    // Upload to cloudinary with timeout protection
+    const uploadResult = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Cloudinary upload timeout'));
+      }, 30000); // 30 second timeout
+
+      try {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'techmates/avatars',
+            resource_type: 'image',
+            quality: 'auto',
+            fetch_format: 'auto',
+            width: 400,
+            height: 400,
+            crop: 'fill',
+            gravity: 'face',
+          },
+          (error, result) => {
+            clearTimeout(timeout);
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(new ApiError(500, 'Failed to upload avatar to storage service'));
+            } else {
+              resolve(result);
+            }
+          }
+        );
+
+        stream.on('error', (streamError) => {
+          clearTimeout(timeout);
+          console.error('Stream error:', streamError);
+          reject(new ApiError(500, 'Stream upload error: ' + streamError.message));
+        });
+
+        stream.end(req.file.buffer);
+      } catch (err) {
+        clearTimeout(timeout);
+        reject(new ApiError(500, 'Upload initialization error: ' + err.message));
       }
+    });
+
+    if (!uploadResult || !uploadResult.secure_url) {
+      throw new ApiError(500, 'Invalid upload result from storage service');
+    }
+
+    // Find and update user
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    // Delete old avatar if exists
+    if (user.avatar && user.avatar.includes('cloudinary')) {
+      try {
+        const publicId = user.avatar.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`techmates/avatars/${publicId}`);
+      } catch (err) {
+        console.warn('Failed to delete old avatar:', err);
+        // Don't throw error, just log it
+      }
+    }
+
+    user.avatar = uploadResult.secure_url;
+    await user.save();
+
+    res.json(
+      new ApiResponse(
+        200,
+        user,
+        'Avatar uploaded successfully'
+      )
     );
-
-    stream.end(req.file.buffer);
-  });
-
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    throw new ApiError(404, 'User not found');
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(500, error.message || 'Failed to upload avatar');
   }
-
-  user.avatar = uploadResult.secure_url;
-  await user.save();
-
-  res.json(new ApiResponse(200, { avatarUrl: user.avatar }, 'Avatar uploaded successfully'));
 });
 
 const getDashboard = asyncHandler(async (req, res) => {

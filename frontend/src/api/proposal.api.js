@@ -73,6 +73,17 @@ const boostProposal = async (proposalId) => {
   return response.data
 }
 
+// Generate AI cover letter
+const generateCoverLetter = async (projectTitle, projectDescription, developerSkills, budgetRange) => {
+  const response = await instance.post('/ai/generate-cover-letter', {
+    projectTitle,
+    projectDescription,
+    developerSkills,
+    budgetRange,
+  })
+  return response.data
+}
+
 // Export object for backward compatibility
 export const proposalAPI = {
   createProposal,
@@ -86,6 +97,7 @@ export const proposalAPI = {
   updateProposal,
   deleteProposal,
   boostProposal,
+  generateCoverLetter,
 }
 
 // Export individual functions
@@ -101,4 +113,5 @@ export {
   updateProposal,
   deleteProposal,
   boostProposal,
+  generateCoverLetter,
 }

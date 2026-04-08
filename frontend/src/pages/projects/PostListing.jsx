@@ -196,7 +196,7 @@ export default function PostListing() {
     <div className="min-h-screen bg-gray-50 py-12 dark:bg-gray-950">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Post a Listing</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Post a Project</h1>
           <p className="mt-2 text-gray-600 dark:text-gray-400">
             Sell your project or tool to thousands of developers
           </p>

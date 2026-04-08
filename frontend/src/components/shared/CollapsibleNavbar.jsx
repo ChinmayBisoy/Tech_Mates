@@ -121,12 +121,12 @@ export function CollapsibleNavbar() {
   ]
 
   const developerMarketplaceItems = [
-    { icon: Store, label: 'My Listings', path: '/projects/my' },
+    { icon: Store, label: 'My Projects', path: '/projects/my' },
     {
-      icon: isProMember ? ShoppingBag : Lock,
-      label: 'Post a Listing',
-      path: isProMember ? '/projects/post' : '/payments/subscription',
-      badge: isProMember ? null : 'Pro',
+      icon: ShoppingBag,
+      label: 'Post a Project',
+      path: '/projects/add',
+      badge: null,
     },
   ]
 

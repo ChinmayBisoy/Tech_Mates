@@ -16,6 +16,7 @@ const ProposalsReceivedPage = lazy(() => import('@/pages/se-market/ProposalsRece
 const BrowseListings = lazy(() => import('@/pages/projects/BrowseListings'))
 const ListingDetail = lazy(() => import('@/pages/projects/ListingDetail'))
 const PostListing = lazy(() => import('@/pages/projects/PostListing'))
+const AddProject = lazy(() => import('@/pages/projects/AddProject'))
 const PurchaseSuccess = lazy(() => import('@/pages/purchase/PurchaseSuccess'))
 
 // Lazy imports for Phase 7 Dashboard pages
@@ -247,6 +248,16 @@ const router = createBrowserRouter([
       {
         path: 'projects/:slug',
         element: <Suspense fallback={<PageLoader />}><ListingDetail /></Suspense>,
+      },
+      {
+        path: 'projects/add',
+        element: (
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AddProject />
+            </Suspense>
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'projects/post',

@@ -6,7 +6,7 @@ import { useThemeStore } from '@/store/themeStore'
 import useOwnerStore from '@/store/ownerStore'
 import { 
   Menu, X, Moon, Sun, LogOut, Bell, Search, Settings, 
-  HelpCircle, Shield, LayoutDashboard, User, LogIn, Zap
+  HelpCircle, Shield, LayoutDashboard, User, LogIn, Zap, Plus
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
@@ -193,6 +193,17 @@ export function Navbar() {
               )}
             </button>
 
+            {/* Add Project Button - For Developers */}
+            {isUserAuthenticated && user?.role === 'developer' && !isOwnerLoggedIn && (
+              <button
+                onClick={() => navigate('/projects/add')}
+                className="inline-flex md:flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-accent dark:hover:bg-accent/90 text-white text-sm font-semibold rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Project</span>
+              </button>
+            )}
+
             {isUserAuthenticated ? (
               <>
                 {/* Notification Bell - Feature 2 */}
@@ -348,6 +359,22 @@ export function Navbar() {
         {isOpen && (
           <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4">
             <div className="flex flex-col gap-1">
+              {/* Add Project Button - Top Priority for Developers */}
+              {isUserAuthenticated && user?.role === 'developer' && !isOwnerLoggedIn && (
+                <div className="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg mx-4 mb-4">
+                  <button
+                    onClick={() => {
+                      navigate('/projects/add')
+                      setIsOpen(false)
+                    }}
+                    className="w-full px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add New Project
+                  </button>
+                </div>
+              )}
+
               {/* Navigation Section */}
               <div className="px-4 py-2">
                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">

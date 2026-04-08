@@ -65,7 +65,7 @@ export default function MyListings() {
               Back
             </button>
 
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Listings</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Projects</h1>
             <p className="mt-2 text-gray-600 dark:text-gray-400">
               Manage and monitor your published projects
             </p>

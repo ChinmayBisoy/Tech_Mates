@@ -35,7 +35,7 @@ export function UserMenuDropdown() {
 
   const menuItems = [
     { icon: User, label: 'Profile', path: '/profile/me' },
-    { icon: ShoppingBag, label: 'My Listings', path: '/my-listings' },
+    { icon: ShoppingBag, label: 'My Projects', path: '/my-listings' }
     { icon: FileText, label: 'My Projects', path: '/my-projects' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: MessageSquare, label: 'Inbox', path: '/messages', badge: 0 },

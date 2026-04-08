@@ -82,6 +82,11 @@ export function EditProfile() {
       const updatedProfile = response
       updateUser(updatedProfile)
       queryClient.setQueryData(['profile', 'edit'], response)
+      // Also update the public profile cache with the user's ID
+      if (user?._id || user?.id) {
+        const userId = String(user._id || user.id)
+        queryClient.setQueryData(['profile', userId], response)
+      }
       setAvatarPreview(null)
       toast.success('Avatar updated successfully')
     },
@@ -174,7 +179,7 @@ export function EditProfile() {
 
   if (profileError) {
     return (
-      <div className="min-h-screen bg-white dark:bg-base py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-blue-50/50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4">
         <div className="max-w-2xl mx-auto">
           <ErrorState
             title="Failed to load profile"
@@ -187,37 +192,33 @@ export function EditProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-base py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-blue-50/50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white">
             Edit Profile
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-slate-600 dark:text-slate-300 mt-2 text-lg">
             Update your profile information
           </p>
         </div>
 
-        <div className="card p-8 space-y-8">
+        <div className="rounded-2xl border border-blue-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-8 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_30px_-15px_rgba(0,0,0,0.3)] space-y-8">
           {/* Avatar Section */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Avatar
-            </h2>
-
-            <div className="flex items-center gap-6">
+          <div className="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-700/40 dark:to-slate-700/30 border border-blue-200/50 dark:border-slate-600/50 p-6">
+            <div className="flex items-center gap-8">
               {/* Avatar Preview */}
               <div>
                 {avatarPreview || profile.avatar ? (
                   <img
                     src={avatarPreview || profile.avatar}
                     alt="Avatar"
-                    className="w-24 h-24 rounded-xl object-cover"
+                    className="w-28 h-28 rounded-2xl object-cover ring-4 ring-blue-200 dark:ring-blue-700"
                   />
                 ) : (
-                  <div className="w-24 h-24 bg-primary-600 rounded-xl flex items-center justify-center">
-                    <span className="text-3xl font-bold text-white">
+                  <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-sky-500 rounded-2xl flex items-center justify-center ring-4 ring-blue-200 dark:ring-blue-700">
+                    <span className="text-4xl font-bold text-white">
                       {profile.name?.charAt(0).toUpperCase() || 'U'}
                     </span>
                   </div>
@@ -225,7 +226,9 @@ export function EditProfile() {
               </div>
 
               {/* Upload Button */}
-              <div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">Profile Picture</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-4">Upload a professional photo (max 5MB)</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -237,7 +240,7 @@ export function EditProfile() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadAvatarMutation.isPending}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                 >
                   {uploadAvatarMutation.isPending ? (
                     <>
@@ -251,9 +254,6 @@ export function EditProfile() {
                     </>
                   )}
                 </button>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                  Max 5MB. JPG, PNG, or GIF.
-                </p>
               </div>
             </div>
           </div>
@@ -262,174 +262,174 @@ export function EditProfile() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Name Field */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <label htmlFor="name" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                 Full Name
               </label>
               <input
                 id="name"
                 type="text"
-                className="input"
+                className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 {...register('name')}
               />
               {errors.name && (
-                <p className="text-danger text-sm mt-1">{errors.name.message}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2">{errors.name.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <label htmlFor="username" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                 Username
               </label>
               <input
                 id="username"
                 type="text"
-                className="input"
+                className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 {...register('username')}
               />
               {errors.username && (
-                <p className="text-danger text-sm mt-1">{errors.username.message}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2">{errors.username.message}</p>
               )}
             </div>
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <label htmlFor="email" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                 Email
               </label>
               <input
                 id="email"
                 type="email"
-                className="input"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700/50 px-4 py-3 text-slate-700 dark:text-slate-300 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none cursor-not-allowed opacity-60"
                 disabled
                 {...register('email')}
               />
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
                 Email cannot be changed
               </p>
             </div>
 
             {/* Bio Field */}
             <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <label htmlFor="bio" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                 Bio
               </label>
               <textarea
                 id="bio"
                 rows={4}
                 placeholder="Tell us about yourself..."
-                className="input resize-none"
+                className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none transition-all"
                 {...register('bio')}
               />
               {errors.bio && (
-                <p className="text-danger text-sm mt-1">{errors.bio.message}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2">{errors.bio.message}</p>
               )}
             </div>
 
             {/* Location Field */}
             <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <label htmlFor="location" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                 Location
               </label>
               <input
                 id="location"
                 type="text"
                 placeholder="City, Country"
-                className="input"
+                className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                 {...register('location')}
               />
             </div>
 
             {/* Links Section */}
-            <div className="space-y-4 p-4 bg-gray-50 dark:bg-elevated rounded-lg">
-              <h3 className="font-semibold text-gray-900 dark:text-white">
+            <div className="space-y-5 p-6 rounded-xl bg-blue-50 dark:bg-slate-700/30 border border-blue-200/50 dark:border-slate-600/50">
+              <h3 className="font-semibold text-slate-900 dark:text-white text-lg">
                 Links
               </h3>
 
               <div>
-                <label htmlFor="portfolioLinks" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                  Portfolio URLs (comma separated)
+                <label htmlFor="portfolioLinks" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
+                  Portfolio URLs <span className="text-slate-500 dark:text-slate-400 font-normal">(comma separated)</span>
                 </label>
                 <input
                   id="portfolioLinks"
                   type="text"
                   placeholder="https://portfolio1.com, https://portfolio2.com"
-                  className="input"
+                  className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                   {...register('portfolioLinks')}
                 />
                 {errors.portfolioLinks && (
-                  <p className="text-danger text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-2">
                     {errors.portfolioLinks.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="website" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                <label htmlFor="website" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   Website
                 </label>
                 <input
                   id="website"
                   type="url"
                   placeholder="https://yourwebsite.com"
-                  className="input"
+                  className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                   {...register('website')}
                 />
                 {errors.website && (
-                  <p className="text-danger text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-2">
                     {errors.website.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="githubUsername" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                <label htmlFor="githubUsername" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   GitHub Username
                 </label>
                 <input
                   id="githubUsername"
                   type="text"
                   placeholder="yourusername"
-                  className="input"
+                  className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                   {...register('githubUsername')}
                 />
                 {errors.githubUsername && (
-                  <p className="text-danger text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-2">
                     {errors.githubUsername.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="linkedin" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                <label htmlFor="linkedin" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   LinkedIn URL
                 </label>
                 <input
                   id="linkedin"
                   type="url"
                   placeholder="https://linkedin.com/in/yourprofile"
-                  className="input"
+                  className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                   {...register('linkedin')}
                 />
                 {errors.linkedin && (
-                  <p className="text-danger text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-2">
                     {errors.linkedin.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="instagram" className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                <label htmlFor="instagram" className="block text-sm font-semibold text-slate-900 dark:text-white mb-2">
                   Instagram URL
                 </label>
                 <input
                   id="instagram"
                   type="url"
                   placeholder="https://instagram.com/yourprofile"
-                  className="input"
+                  className="w-full rounded-lg border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                   {...register('instagram')}
                 />
                 {errors.instagram && (
-                  <p className="text-danger text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-2">
                     {errors.instagram.message}
                   </p>
                 )}
@@ -438,8 +438,8 @@ export function EditProfile() {
 
             {/* Skills Section (Developer only) */}
             {isDeveloper && (
-              <div className="space-y-4 p-4 bg-gray-50 dark:bg-elevated rounded-lg">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
+              <div className="space-y-5 p-6 rounded-xl bg-blue-50 dark:bg-slate-700/30 border border-blue-200/50 dark:border-slate-600/50">
+                <h3 className="font-semibold text-slate-900 dark:text-white text-lg">
                   Skills
                 </h3>
 
@@ -447,8 +447,8 @@ export function EditProfile() {
                   name="skills"
                   control={control}
                   render={({ field }) => (
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {SKILLS.map((skill) => (
                           <button
                             key={skill}
@@ -460,10 +460,10 @@ export function EditProfile() {
                               field.onChange(updated)
                             }}
                             className={cn(
-                              'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
+                              'px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-200',
                               field.value?.includes(skill)
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                                ? 'bg-gradient-to-r from-blue-600 to-sky-600 text-white shadow-md shadow-blue-500/30'
+                                : 'border border-blue-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 dark:hover:border-slate-500 hover:bg-blue-50 dark:hover:bg-slate-700/80'
                             )}
                           >
                             {skill}
@@ -472,11 +472,11 @@ export function EditProfile() {
                       </div>
 
                       {field.value && field.value.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 p-4 bg-white dark:bg-slate-700/40 rounded-lg border border-blue-200/50 dark:border-slate-600/50">
                           {field.value.map((skill) => (
                             <div
                               key={skill}
-                              className="inline-flex items-center gap-1 bg-primary-100 dark:bg-primary-600/30 text-primary-700 dark:text-primary-100 px-3 py-1 rounded-full text-sm"
+                              className="inline-flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm font-medium"
                             >
                               {skill}
                               <button
@@ -486,9 +486,9 @@ export function EditProfile() {
                                     field.value.filter((s) => s !== skill)
                                   )
                                 }}
-                                className="hover:text-primary-900 dark:hover:text-primary-100 transition-colors"
+                                className="hover:opacity-80 transition-opacity"
                               >
-                                <X className="w-3 h-3" />
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           ))}
@@ -504,12 +504,12 @@ export function EditProfile() {
             <button
               type="submit"
               disabled={isSubmitting || updateProfileMutation.isPending}
-              className="w-full btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-6 py-3.5 font-bold text-white shadow-lg shadow-blue-600/40 transition-all hover:shadow-xl hover:shadow-blue-600/50 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:shadow-none active:scale-95"
             >
               {isSubmitting || updateProfileMutation.isPending ? (
                 <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Saving...
+                  <Loader className="w-5 h-5 animate-spin" />
+                  Saving changes...
                 </>
               ) : (
                 'Save Changes'
