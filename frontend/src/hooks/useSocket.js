@@ -10,7 +10,7 @@ const getSocketServerUrl = () => {
     return import.meta.env.VITE_SOCKET_URL
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  const apiUrl = import.meta.env.VITE_API_URL || window.location.origin
   return String(apiUrl).replace(/\/api\/?$/, '')
 }
 
